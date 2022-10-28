@@ -23,7 +23,7 @@ for (x in files) {
   dds <- DESeqDataSetFromMatrix(
     countData = cts,
     colData = coldata,
-    design = ~sample
+    design = ~pseudo_rep + sample
   )
   dds <- DESeq(dds, test = "LRT", reduced = ~1)
   res <- results(dds, contrast = c("sample", "FL", "yBM"))

@@ -36,7 +36,7 @@ for (x in files) {
   dds <- DESeqDataSetFromMatrix(
     countData = cts,
     colData = coldata,
-    design = ~sample
+    design = ~pseudo_rep + sample
   )
   dds <- DESeq(dds, test = "LRT", reduced = ~1)
   res <- results(dds, contrast = c("sample", "FL", "yBM"))
@@ -124,7 +124,7 @@ coldata_combined_clust <- coldata_combined
 
 dds <- DESeqDataSetFromMatrix(
   countData = cts_combined, colData = coldata_combined,
-  design = ~1
+  design = ~pseudo_rep + sample
 )
 dds <- DESeq(dds)
 
