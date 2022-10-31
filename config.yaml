@@ -1,0 +1,21 @@
+seed: 12345
+external_dir: "data/external/"
+interim_dir: "data/interim/"
+processed_dir: "data/processed/"
+raw_dir: "data/raw/"
+fl_cores: [
+  "FLcoreNoPseudotech",
+  "FLcoreSC",
+  "FLcorePseudotech"
+]
+fl_clusters_to_use: [
+  "Cyc",
+  "DC.Mono",
+  "GMP",
+  "HSC",
+  "Ly.I",
+  "Ly.II",
+  "MEP",
+  "MPP.I",
+  "MPP.II"
+]
