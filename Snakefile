@@ -62,14 +62,14 @@ rule deseq_all_clustered_pops:
             cluster=config["fl_clusters_to_use"],
             allow_missing=True,
         ),
-        # mpp1_hsc_rnk=expand(
-        #     DESEQ2_DIR + "{fl_core_version}/FL_MPPI_HSC.rnk",
-        #     allow_missing=True,
-        # ),
-        # mpp1_mpp2_rnk=expand(
-        #     DESEQ2_DIR + "{fl_core_version}/FL_MPPI_MPPII.rnk",
-        #     allow_missing=True,
-        # ),
+        mpp1_hsc_rnk=expand(
+            DESEQ2_DIR + "{fl_core_version}/FL_MPPI_HSC.rnk",
+            allow_missing=True,
+        ),
+        mpp1_mpp2_rnk=expand(
+            DESEQ2_DIR + "{fl_core_version}/FL_MPPI_MPPII.rnk",
+            allow_missing=True,
+        ),
     conda:
         "envs/DESeq2.yaml"
     script:
@@ -107,6 +107,18 @@ rule deseq_all_gated_pops:
         "src/DESeq2/1.2_All_gated_pops.R"
 
 
+rule gather_cores:
+    input:
+        fetal_signature=expand(
+            DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
+            fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+        ),
+        adult_signature=expand(
+            DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
+            fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+        ),
+
+
 rule deseq_produce_fl_core:
     input:
         deseq_results=expand(
@@ -125,7 +137,37 @@ rule deseq_produce_fl_core:
             cluster=config["fl_clusters_to_use"],
             allow_missing=True,
         ),
+        de_genes=DESEQ2_DIR + "{fl_core_version}/DE_genes.csv",
+        adult_signature=DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
+    conda:
+        "envs/DESeq2.yaml"
     script:
-        "src/DESeq2/1.3_produce_FL_core.R"
+        "src/DESeq2/1.3a_produce_FL_core.R"
 
 
+rule deseq_produce_fl_core:
+    input:
+        deseq_results=expand(
+            DESEQ2_DIR + "{fl_core_version}/{cluster}_FL_yBM.csv",
+            cluster=config["fl_clusters_to_use"],
+            allow_missing=True,
+        ),
+    output:
+        sub_setter_pos=expand(
+            DESEQ2_DIR + "sub_setter/{fl_core_version}/{cluster}_pos.csv",
+            cluster=config["fl_clusters_to_use"],
+            allow_missing=True,
+        ),
+        sub_setter_neg=expand(
+            DESEQ2_DIR + "sub_setter/{fl_core_version}/{cluster}_neg.csv",
+            cluster=config["fl_clusters_to_use"],
+            allow_missing=True,
+        ),
+        de_genes=DESEQ2_DIR + "{fl_core_version}/DE_genes.csv",
+        adult_signature=DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/1.3b_produce_sc_FL_core.R"
