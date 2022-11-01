@@ -138,7 +138,8 @@ coldata_combined <- coldata_combined[!grepl(
 
 dds <- DESeqDataSetFromMatrix(
   countData = cts_combined, colData = coldata_combined,
-  design = deseq_design
+  design = ~pseudo_rep + cluster_name
+  # design = deseq_design
 )
 
 dds <- DESeq(dds)
@@ -153,26 +154,26 @@ write.table(norm_counts,
 
 # dds@colData$cluster_name <- as.factor(dds@colData$cluster_name)
 
-# res <- results(dds, contrast = c("cluster_name", "MPP.I", "HSC"))
+res <- results(dds, contrast = c("cluster_name", "MPP.I", "HSC"))
 
-# # create dataframe containing log2 fold change and no NAs for GSEA
-# res_table <- data.frame(res)
-# res_table <- subset.data.frame(res_table, select = "log2FoldChange")
-# res_table <- na.omit(res_table)
-# write.table(res_table,
-#   # paste0(out_dir, "/results/", "FL_MPPI_HSC.rnk"),
-#   snakemake@output[["mpp1_hsc_rnk"]],
-#   sep = "\t"
-# )
+# create dataframe containing log2 fold change and no NAs for GSEA
+res_table <- data.frame(res)
+res_table <- subset.data.frame(res_table, select = "log2FoldChange")
+res_table <- na.omit(res_table)
+write.table(res_table,
+  # paste0(out_dir, "/results/", "FL_MPPI_HSC.rnk"),
+  snakemake@output[["mpp1_hsc_rnk"]],
+  sep = "\t"
+)
 
-# res <- results(dds, contrast = c("cluster_name", "MPP.I", "MPP.II"))
+res <- results(dds, contrast = c("cluster_name", "MPP.I", "MPP.II"))
 
-# res_table <- data.frame(res)
-# res_table <- subset.data.frame(res_table, select = "log2FoldChange")
-# res_table <- na.omit(res_table)
+res_table <- data.frame(res)
+res_table <- subset.data.frame(res_table, select = "log2FoldChange")
+res_table <- na.omit(res_table)
 
-# write.table(res_table,
-#   # paste0(out_dir, "/results/", "FL_MPPI_MPPII.rnk"),
-#   snakemake@output[["mpp1_mpp2_rnk"]],
-#   sep = "\t"
-# )
+write.table(res_table,
+  # paste0(out_dir, "/results/", "FL_MPPI_MPPII.rnk"),
+  snakemake@output[["mpp1_mpp2_rnk"]],
+  sep = "\t"
+)
