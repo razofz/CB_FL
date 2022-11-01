@@ -1,28 +1,47 @@
-source("env.R")
-suppressPackageStartupMessages(library("DESeq2"))
-suppressPackageStartupMessages(library("stringr"))
-suppressPackageStartupMessages(library("biomaRt"))
-suppressPackageStartupMessages(library("ggplot2"))
+invisible(lapply(list(
+  "stringr",
+  "biomaRt",
+  "ggplot2",
+  "DESeq2"
+), FUN = function(x) {
+  suppressPackageStartupMessages(library(x, character.only = T))
+}))
 
-out_dir <- "data/processed/DEseq2"
-# path_to_files <- "data/processed/notebooks/DEseq2/gate_wise"
-path_to_files <- "data/raw/paper_specific/DEseq2/gate_wise"
-images_dir <- paste0(out_dir, "/images")
-files <- list.files(
-  path = path_to_files, pattern = "*_coldata_all_hpc.csv",
-  full.names = TRUE, recursive = FALSE
+set.seed(snakemake@config[["seed"]])
+
+gates <- snakemake@config[["gates_to_use"]]
+cts_files <- snakemake@input[["cts_files"]]
+coldata_files <- snakemake@input[["coldata_files"]]
+
+print(gates)
+
+make_named_version <- function(ids, file_list, pattern = "_") {
+  named_file_list <- unlist(
+    lapply(ids,
+      FUN = function(id) {
+        file_list[str_detect(string = file_list, pattern = str_c(id, pattern))]
+      }
+    )
+  )
+  names(named_file_list) <- ids
+  return(named_file_list)
+}
+
+named_cts_files <- make_named_version(ids = gates, file_list = cts_files)
+named_coldata_files <- make_named_version(
+  ids = gates, file_list = coldata_files
 )
+
 cts_combined <- data.frame()
 coldata_combined <- data.frame()
-
-for (x in 1:length(files)) {
-  spl <- str_split(files[x], "/", simplify = T)
-  names <- str_split(spl[length(spl)], "_coldata_all_hpc.csv", simplify = T)[1]
-  print(paste0("> ", names))
-  cts <- read.csv(paste0(path_to_files, "/", names, "_cts_all_hpc.csv"), row.names = 1)
-  coldata <- read.csv(files[x], row.names = 1)
-
-  if (x == 1) {
+for (gate_idx in seq_len(length(gates))) {
+  cts <- read.csv(named_cts_files[gates[gate_idx]],
+    row.names = 1
+  )
+  coldata <- read.csv(named_coldata_files[gates[gate_idx]],
+    row.names = 1
+  )
+  if (gate_idx == 1) {
     cts_combined <- cts
     coldata_combined <- coldata
   } else {
@@ -31,35 +50,42 @@ for (x in 1:length(files)) {
   }
 }
 
-cts_combined_gate <- cts_combined
-coldata_combined_gate <- coldata_combined
-
 dds <- DESeqDataSetFromMatrix(
-  countData = cts_combined, colData = coldata_combined,
+  countData = cts_combined,
+  colData = coldata_combined,
   design = ~1
 )
 dds <- DESeq(dds)
-vsd_FL_gate <- vst(dds, blind = TRUE)
+vsd_fl <- vst(dds, blind = TRUE)
 
+rv_fl <- rowVars(assay(vsd_fl)) # calculate variance
+select_fl <- order(rv_fl, decreasing = T)[seq_len(min(500, length(rv_fl)))]
+# find the top 500 genes by variance
 
-rv_FL <- rowVars(assay(vsd_FL_gate)) # calculate variance
-select_FL <- order(rv_FL, decreasing = T)[seq_len(min(500, length(rv_FL)))] # find the top 500 genes by variance
-pca_FL <- prcomp(t(assay(vsd_FL_gate)[select_FL, ])) # calculate PCA
-percentVar_FL <- pca_FL$sdev^2 / sum(pca_FL$sdev^2) # calc PCA contribution
-intgroup_FL <- c("sample", "gate_name")
-intgroup_FL.df <- as.data.frame(colData(vsd_FL_gate)[, intgroup_FL, drop = FALSE]) # add grouping if wanted
-group <- if (length(intgroup_FL) > 1) {
-  factor(apply(intgroup_FL.df, 1, paste, collapse = ":"))
+pca_fl <- prcomp(t(assay(vsd_fl)[select_fl, ])) # calculate PCA
+percentVar_fl <- pca_fl$sdev^2 / sum(pca_fl$sdev^2) # calc PCA contribution
+intgroup_fl <- c("sample", "gate_name")
+intgroup_fl_df <- as.data.frame(colData(vsd_fl)[, intgroup_fl, drop = FALSE])
+# add grouping if wanted
+group <- if (length(intgroup_fl) > 1) {
+  factor(apply(intgroup_fl_df, 1, paste, collapse = ":"))
 } else {
-  colData(vsd_FL)[[intgroup_FL]]
+  colData(vsd_fl)[[intgroup_fl]]
 }
-d_FL <- data.frame(PC1 = pca_FL$x[, 1], PC2 = pca_FL$x[, 2], PC3 = pca_FL$x[, 3], group = group, intgroup_FL.df, name = colnames(vsd_FL_gate))
-loading_FL <- data.frame(
-  LO1 = pca_FL$rotation[, 1], LO2 = pca_FL$rotation[, 2], LO3 = pca_FL$rotation[, 3],
-  name = rownames(pca_FL$rotation)
+d_fl <- data.frame(
+  PC1 = pca_fl$x[, 1],
+  PC2 = pca_fl$x[, 2],
+  PC3 = pca_fl$x[, 3],
+  group = group, intgroup_fl_df, name = colnames(vsd_fl)
+)
+loading_fl <- data.frame(
+  LO1 = pca_fl$rotation[, 1],
+  LO2 = pca_fl$rotation[, 2],
+  LO3 = pca_fl$rotation[, 3],
+  name = rownames(pca_fl$rotation)
 )
 
-colors_scale2 <- c(
+colors_scale <- c(
   "#dd00ff", # CD10
   "#addfff", # MPP
   "#fff148", # 49F
@@ -75,49 +101,43 @@ colors_scale2 <- c(
   "#ff5a5a" # MEP135
 )
 
-ggplot(data = d_FL, aes_string(x = "PC1", y = "PC2")) +
-  geom_point(aes_string(fill = "gate_name", shape = "sample"), size = 5) +
-  xlab(paste0("PC1: ", round(percentVar_FL[1] * 100), "% variance")) +
-  ylab(paste0("PC2: ", round(percentVar_FL[2] * 100), "% variance")) +
-  theme_bw() +
-  # geom_text(aes(label=gate_name), size=3, nudge_x = 1, nudge_y = 1)+
-  theme(aspect.ratio = 1) +
-  coord_fixed() +
-  scale_colour_manual(values = colors_scale2, aesthetics = c("color", "fill")) +
-  scale_shape_manual(values = c(21, 24)) +
-  guides(
-    fill = guide_legend(override.aes = list(shape = 21)),
-    shape = guide_legend(override.aes = list(fill = "black"))
+for (pcs in list(1:2, 2:3)) {
+  p <- ggplot(
+    data = d_fl,
+    aes_string(
+      x = str_c("PC", pcs[[1]]),
+      y = str_c("PC", pcs[[2]])
+    )
+  ) +
+    geom_point(
+      aes_string(fill = "gate_name", shape = "sample"),
+      size = 5
+    ) +
+    xlab(paste0(
+      "PC", pcs[[1]], ": ", round(percentVar_fl[pcs[[1]]] * 100),
+      "% variance"
+    )) +
+    ylab(paste0(
+      "PC", pcs[[2]], ": ", round(percentVar_fl[pcs[[2]]] * 100),
+      "% variance"
+    )) +
+    theme_bw() +
+    theme(aspect.ratio = 1) +
+    coord_fixed() +
+    scale_colour_manual(
+      values = colors_scale,
+      aesthetics = c("color", "fill")
+    ) +
+    scale_shape_manual(values = c(21, 24)) +
+    guides(
+      fill = guide_legend(override.aes = list(shape = 21)),
+      shape = guide_legend(override.aes = list(fill = "black"))
+    )
+  ggsave(
+    snakemake@output[[str_c("plot_pc", str_flatten(pcs))]],
+    plot = p,
+    width = 7,
+    height = 7,
+    units = "in"
   )
-  # scale_colour_manual(values = colors_scale2, aesthetics = c("color", "fill"), guide = "none") +
-  # scale_shape_manual(values = c(21, 24), guide = "none") #+
-ggsave(paste0(images_dir, "/PC12_FL_BM_singel_cell_gates_top500.pdf"),
-  plot = last_plot(),
-  width = 7,
-  height = 7,
-  units = "in"
-)
-
-
-ggplot(data = d_FL, aes_string(x = "PC2", y = "PC3")) +
-  geom_point(aes_string(fill = "gate_name", shape = "sample"), size = 5) +
-  xlab(paste0("PC2: ", round(percentVar_FL[2] * 100), "% variance")) +
-  ylab(paste0("PC3: ", round(percentVar_FL[3] * 100), "% variance")) +
-  theme_bw() +
-  theme(aspect.ratio = 1) +
-  # geom_text(aes(label=gate_name), size=3, nudge_x = 0.5, nudge_y = 0.5)+
-  coord_fixed() +
-  scale_colour_manual(values = colors_scale2, aesthetics = c("color", "fill")) +
-  scale_shape_manual(values = c(21, 24)) +
-  guides(
-    fill = guide_legend(override.aes = list(shape = 21)),
-    shape = guide_legend(override.aes = list(fill = "black"))
-  )
-  # scale_colour_manual(values = colors_scale2, aesthetics = c("color", "fill"), guide = "none") +
-  # scale_shape_manual(values = c(21, 24), guide = "none") #+
-ggsave(paste0(images_dir, "/PC23_FL_BM_singel_cell_gates_top500.pdf"),
-  plot = last_plot(),
-  width = 7,
-  height = 7,
-  units = "in"
-)
+}

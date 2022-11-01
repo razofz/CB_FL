@@ -377,11 +377,11 @@ for (pcs in list(1:2, 2:3)) {
       color = "black", shape = 21, size = 5
     ) +
     xlab(paste0(
-      "PC2: ", round(percentVar_FL_cluster[pcs[[1]]] * 100),
+      "PC", pcs[[1]], ": ", round(percentVar_FL_cluster[pcs[[1]]] * 100),
       "% variance"
     )) +
     ylab(paste0(
-      "PC3: ", round(percentVar_FL_cluster[pcs[[2]]] * 100),
+      "PC", pcs[[2]], ": ", round(percentVar_FL_cluster[pcs[[2]]] * 100),
       "% variance"
     )) +
     theme_bw() +
@@ -415,11 +415,11 @@ for (pcs in list(1:2, 2:3)) {
       color = "black", shape = 21, size = 5
     ) +
     xlab(paste0(
-      "PC2: ", round(percentVar_FL_gate[pcs[[1]]] * 100),
+      "PC", pcs[[1]], ": ", round(percentVar_FL_gate[pcs[[1]]] * 100),
       "% variance"
     )) +
     ylab(paste0(
-      "PC3: ", round(percentVar_FL_gate[pcs[[2]]] * 100),
+      "PC", pcs[[2]], ": ", round(percentVar_FL_gate[pcs[[2]]] * 100),
       "% variance"
     )) +
     theme_bw() +
@@ -453,11 +453,11 @@ for (pcs in list(1:2, 2:3)) {
       size = 5
     ) +
     xlab(paste0(
-      "PC2: ", round(percentVar_FL_both[pcs[[1]]] * 100),
+      "PC", pcs[[1]], ": ", round(percentVar_FL_both[pcs[[1]]] * 100),
       "% variance"
     )) +
     ylab(paste0(
-      "PC3: ", round(percentVar_FL_both[pcs[[2]]] * 100),
+      "PC", pcs[[2]],": ", round(percentVar_FL_both[pcs[[2]]] * 100),
       "% variance"
     )) +
     theme_bw() +

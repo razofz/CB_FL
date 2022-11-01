@@ -27,16 +27,17 @@ rule all:
             gate=config["gates_to_use"],
             fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
         ),
-        fetal_signature=expand(
+        expand(
             DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
             # fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
             fl_core_version=config["fl_cores"],
         ),
-        adult_signature=expand(
+        expand(
             DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
             # fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
             fl_core_version=config["fl_cores"],
         ),
+        DESEQ2_PLOT_DIR + "PC12_singel_cell_clusters_top500.pdf",
 
 
 rule deseq_all_clustered_pops:
@@ -254,3 +255,67 @@ rule plot_pca:
         "envs/DESeq2.yaml"
     script:
         "src/DESeq2/2.1_plot_pca.R"
+
+
+rule plot_fl_bm_clusters_pca:
+    input:
+        cts_files=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/cluster_wise/"
+            + "{cluster}_cts_all_hpc.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+        coldata_files=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/cluster_wise/"
+            + "{cluster}_coldata_all_hpc.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+    output:
+        plot_pc12=DESEQ2_PLOT_DIR +
+        "PC12_FL_BM_singel_cell_clusters_top500.pdf",
+        plot_pc23=DESEQ2_PLOT_DIR +
+        "PC23_FL_BM_singel_cell_clusters_top500.pdf",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/3.1_investigate_FL_BM_clusters_in_PCA.R"
+
+
+rule plot_fl_bm_gates_pca:
+    input:
+        cts_files=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/gate_wise/"
+            + "{gate}_cts_all_hpc.csv",
+            gate=config["gates_to_use"],
+        ),
+        coldata_files=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/gate_wise/"
+            + "{gate}_coldata_all_hpc.csv",
+            gate=config["gates_to_use"],
+        ),
+    output:
+        plot_pc12=DESEQ2_PLOT_DIR +
+        "PC12_FL_BM_singel_cell_gates_top500.pdf",
+        plot_pc23=DESEQ2_PLOT_DIR +
+        "PC23_FL_BM_singel_cell_gates_top500.pdf",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/3.2_investigate_FL_BM_gates_in_PCA.R"
+
+rule export_ball_excel_to_tsv:
+    input:
+        ball_xlsx=config["external_dir"] +
+        "BALL-1988S-HTSeq/B-ALL-subtyping.xlsx",
+    output:
+        ball_tsv=config["external_dir"] +
+        "BALL-1988S-HTSeq/subtypes.tsv",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/4.0_export_excel_sheet_to_tsv.py"
+
+
