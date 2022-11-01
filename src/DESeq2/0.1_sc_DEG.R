@@ -8,24 +8,49 @@ invisible(lapply(list(
   suppressPackageStartupMessages(library(x, character.only = T))
 }))
 
-plan(multisession, workers = 16)
-options(future.globals.maxSize = 20e3 * 1024^2)
-set.seed(12345)
+set.seed(snakemake@config[["seed"]])
+threads <- snakemake@threads
+# print(threads)
+plan(multisession, workers = threads)
+options(future.globals.maxSize = 16e3 * 1024^2)
 
-out_dir <- str_c(
-  Sys.getenv("PROJECT_PATH"),
-  "/data/processed/DEseq2/"
+clusters <- snakemake@config[["fl_clusters_to_use"]]
+
+# out_dir <- str_c(
+#   Sys.getenv("PROJECT_PATH"),
+#   "/data/processed/DEseq2/"
+# )
+# plots_dir <- str_c(out_dir, "/images/")
+
+deg_results_bm_files <- snakemake@output[["deg_results_bm"]]
+deg_results_fl_files <- snakemake@output[["deg_results_fl"]]
+named_deg_results_bm <- unlist(
+  lapply(clusters,
+    FUN = function(cl) {
+      deg_results_bm_files[str_detect(deg_results_bm_files, str_c(cl, "_"))]
+    }
+  )
 )
-plots_dir <- str_c(out_dir, "/images/")
+named_deg_results_fl <- unlist(
+  lapply(clusters,
+    FUN = function(cl) {
+      deg_results_fl_files[str_detect(deg_results_fl_files, str_c(cl, "_"))]
+    }
+  )
+)
+names(named_deg_results_bm) <- clusters
+names(named_deg_results_fl) <- clusters
 
 donors <- c(str_c("yBM", 1:2), str_c("FL", 1:2))
 samples <- c("FL", "BM")
+config_samples <- snakemake@config[["samples"]]
 
 metadata <- read.table(
-  str_c(
-    Sys.getenv("PROJECT_PATH"),
-    "/data/raw/paper_specific/from_seurat/FL_BM_combined_metadata.csv"
-  ),
+  snakemake@input[["combined_metadata"]],
+  # str_c(
+  #   Sys.getenv("PROJECT_PATH"),
+  #   "/data/raw/paper_specific/from_seurat/FL_BM_combined_metadata.csv"
+  # ),
   sep = ","
 )
 rownames(metadata) <- str_replace(
@@ -39,34 +64,48 @@ metadata$orig.ident <- str_replace(
   replacement = ""
 )
 
-for (sample in samples) {
+for (sample in config_samples) {
   if (str_detect(pattern = "BM", string = sample)) {
     formatted_sample <- str_to_lower(sample)
   } else if (str_detect(pattern = "FL", string = sample)) {
     formatted_sample <- sample
   }
+  path <- str_c(
+    dirname(
+      snakemake@output[["cells"]][[1]]
+    ),
+    "/", sample, "_cells.csv"
+  )
+  # print(path)
   write.table(
-    rownames(metadata[metadata$orig.ident == formatted_sample, ]),
-    file = str_c(out_dir, sample, "_cells.csv")
+    rownames(metadata[str_detect(metadata$orig.ident, formatted_sample), ]),
+    file = path
+    # file = str_c(out_dir, sample, "_cells.csv")
   )
 }
 
-object_list <- future_lapply(samples,
-  FUN = function(sample) {
-    mat <- Read10X(str_c(
-      Sys.getenv("PROJECT_PATH"),
-      "/data/raw/cite_cell_matrices/",
-      sample,
+
+# print(snakemake@input[["cite_cell_matrices_dir"]])
+# print(dir(snakemake@input[["cite_cell_matrices_dir"]]))
+
+object_list <- future_lapply(donors,
+  FUN = function(donor) {
+    path <- str_c(
+      snakemake@input[["cite_cell_matrices_dir"]],
+      "/",
+      donor,
       "_hpc/"
-    ))$`Gene Expression`
-    if (str_detect(pattern = "BM", string = sample)) {
+    )
+    print(str_c("> Loading ", donor, " data.."))
+    mat <- Read10X(path)$`Gene Expression`
+    if (str_detect(pattern = "BM", string = donor)) {
       colnames_mat <- str_c(
-        "BM_", str_to_lower(sample), "_",
+        "BM_", str_to_lower(donor), "_",
         colnames(mat)
       )
-    } else if (str_detect(pattern = "FL", string = sample)) {
+    } else if (str_detect(pattern = "FL", string = donor)) {
       colnames_mat <- str_c(
-        "FL_", sample, "_",
+        "FL_", donor, "_",
         colnames(mat)
       )
     }
@@ -78,10 +117,23 @@ object_list <- future_lapply(samples,
     )
     obj <- CreateSeuratObject(
       counts = mat,
-      project = sample,
+      project = donor,
       assay = "RNA"
     )
-    cells_to_keep <- read.table(str_c(out_dir, sample, "_cells.csv"))$x
+    sample <- str_sub(donor, end = -2)
+    # if (str_detect(pattern = "BM", string = sample)) {
+    #   formatted_sample <- str_sub(sample, start = 2)
+    # } else if (str_detect(pattern = "FL", string = sample)) {
+    #   formatted_sample <- sample
+    # }
+    cells_to_keep <- read.table(
+      str_c(
+        dirname(
+          snakemake@output[["cells"]][[1]]
+        ), "/", sample, "_cells.csv"
+      )
+    )$x
+    # cells_to_keep <- read.table(str_c(out_dir, donor, "_cells.csv"))$x
     obj <- subset(obj, cells = cells_to_keep)
     obj <- NormalizeData(obj)
     obj <- FindVariableFeatures(
@@ -117,35 +169,37 @@ combined[["donor"]] <- sapply(rownames(combined[[]]), FUN = function(x) {
 #   str_sub(x, end = -2)
 # })
 
-Idents(combined) <- "donor"
-p <- DimPlot(combined, reduction = "umap") + coord_fixed()
-p
-ggsave(p,
-  filename = str_c(plots_dir, "umap.svg"),
-  device = "svg", width = 7, height = 7
-)
+# Idents(combined) <- "donor"
+# p <- DimPlot(combined, reduction = "umap") + coord_fixed()
+# p
+# ggsave(p,
+#   filename = str_c(plots_dir, "umap.svg"),
+#   device = "svg", width = 7, height = 7
+# )
 
-p <- DimPlot(combined, reduction = "umap", split.by = "orig.sample") +
-  coord_fixed()
-p
-ggsave(p,
-  filename = str_c(plots_dir, "umap_split.svg"),
-  device = "svg", width = 11, height = 5
-)
+# p <- DimPlot(combined, reduction = "umap", split.by = "orig.sample") +
+#   coord_fixed()
+# p
+# ggsave(p,
+#   filename = str_c(plots_dir, "umap_split.svg"),
+#   device = "svg", width = 11, height = 5
+# )
 
 # bm both boys
 # fl one boy one girl
 
-path <- str_c(
-  Sys.getenv("PROJECT_PATH"),
-  "/data/processed/notebooks/mapping_predictions/RNA_FL_target_preds.json"
-)
+# path <- str_c(
+#   Sys.getenv("PROJECT_PATH"),
+#   "/data/processed/notebooks/mapping_predictions/RNA_FL_target_preds.json"
+# )
+path <- snakemake@input[["mapping_predictions"]]
 
 fl_metadata <- read.table(
-  str_c(
-    Sys.getenv("PROJECT_PATH"),
-    "/data/processed/seurat/CS22/FL_combined_metadata.csv"
-  ),
+  snakemake@input[["fl_metadata"]],
+  # str_c(
+  #   Sys.getenv("PROJECT_PATH"),
+  #   "/data/processed/seurat/CS22/FL_combined_metadata.csv"
+  # ),
   sep = ","
 )
 
@@ -173,15 +227,15 @@ md[rownames(fl_metadata), "fl_cluster"] <- fl_metadata$clust.names
 
 combined@meta.data <- md
 
-DimPlot(combined,
-  reduction = "umap", group.by = "fl_cluster",
-  split.by = "orig.sample"
-) + coord_fixed()
+# DimPlot(combined,
+#   reduction = "umap", group.by = "fl_cluster",
+#   split.by = "orig.sample"
+# ) + coord_fixed()
 
-DimPlot(combined,
-  reduction = "umap", group.by = "fl_cluster",
-  split.by = "donor"
-) + coord_fixed()
+# DimPlot(combined,
+#   reduction = "umap", group.by = "fl_cluster",
+#   split.by = "donor"
+# ) + coord_fixed()
 
 DefaultAssay(combined) <- "RNA"
 combined[["comparees"]] <- str_c(
@@ -192,6 +246,7 @@ Idents(combined) <- "comparees"
 
 fl_clusters <- unique(combined[[]][, "fl_cluster"])
 fl_clusters <- fl_clusters[fl_clusters != "NA"]
+fl_clusters <- fl_clusters[!is.na(fl_clusters)]
 fl_clusters <- fl_clusters[fl_clusters != "Ly-III"]
 fl_clusters <- fl_clusters[fl_clusters != "DC-I"]
 
@@ -210,258 +265,72 @@ ordering <- c(
   "BM_MPP-II", "FL_Ly-I", "BM_Ly-I", "FL_Ly-II", "BM_Ly-II",
   "FL_Ly-III", "BM_Ly-III", "FL_DC-I", "BM_DC-I", "FL_DC-Mono",
   "BM_DC-Mono", "FL_GMP", "BM_GMP", "FL_MEP", "BM_MEP", "FL_Cyc",
-  "BM_Cyc", "BM_NA"
+  "BM_Cyc", "BM_NA", "FL_NA"
 )
 tmp <- as.factor(combined[[]][, "comparees"])
 levels(tmp) <- ordering
 combined[["comparees"]] <- tmp
 
-simple_dir <- str_c(out_dir, "markers_simple_way/")
-dir.create(simple_dir, recursive = T)
+# simple_dir <- str_c(out_dir, "markers_simple_way/")
+# dir.create(simple_dir, recursive = T)
 
 DefaultAssay(combined) <- "RNA"
 Idents(combined) <- "comparees"
-for (cluster in fl_clusters) {
-# for (cluster in c("HSC")) {
+# for (cluster in fl_clusters) {
+for (cluster in clusters) {
+  # for (cluster in c("HSC")) {
   print(cluster)
-  fc_threshold <- .25
+  fc_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["log2foldchange"]]
+  formatted_cluster <- str_replace(
+    pattern = "\\.",
+    replacement = "-",
+    string = cluster
+  )
   markers <- FindMarkers(combined,
-    ident.1 = str_c("BM_", cluster),
-    ident.2 = str_c("FL_", cluster),
+    ident.1 = str_c("BM_", formatted_cluster),
+    ident.2 = str_c("FL_", formatted_cluster),
     only.pos = T,
     logfc.threshold = fc_threshold,
     verbose = FALSE
   )
   markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
-  write.table(markers, file = str_c(
-    simple_dir, cluster, "_BM_specific",
-    "_markers.csv"
-  ))
+  # write.table(markers, file = named_deg_results_bm[[str_replace(
+  #   pattern = "-",
+  #   replacement = "\\.",
+  #   string = cluster
+  # )]])
+  print(named_deg_results_bm[[cluster]])
+  write.table(markers, file = named_deg_results_bm[[cluster]])
   markers <- FindMarkers(combined,
-    ident.1 = str_c("FL_", cluster),
-    ident.2 = str_c("BM_", cluster),
+    ident.1 = str_c("FL_", formatted_cluster),
+    ident.2 = str_c("BM_", formatted_cluster),
     only.pos = T,
     logfc.threshold = fc_threshold,
     verbose = FALSE
   )
   markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
-  write.table(markers, file = str_c(
-    simple_dir, cluster, "_FL_specific",
-    "_markers.csv"
-  ))
+  print(named_deg_results_fl[[cluster]])
+  write.table(markers, file = named_deg_results_fl[[cluster]])
 }
 
-Idents(combined) <- "comparees"
-p <- DotPlot(combined,
-  features = feats, cols = c("blue", "red"),
-  group.by = "comparees", split.by = "orig.sample"
-) + RotatedAxis() + scale_y_discrete(limits = rev)
-p
-ggsave(p,
-  filename = str_c(out_dir, "dotplot_sample.svg"),
-  device = "svg", width = 10, height = 11
-)
+# Idents(combined) <- "comparees"
+# p <- DotPlot(combined,
+#   features = feats, cols = c("blue", "red"),
+#   group.by = "comparees", split.by = "orig.sample"
+# ) + RotatedAxis() + scale_y_discrete(limits = rev)
+# p
+# ggsave(p,
+#   filename = str_c(out_dir, "dotplot_sample.svg"),
+#   device = "svg", width = 10, height = 11
+# )
 
-p <- DotPlot(combined,
-  features = feats, cols = c(
-    "magenta", "blue", "green", "brown"
-  ), group.by = "comparees", split.by = "donor"
-) + RotatedAxis() + scale_y_discrete(limits = rev)
-p
-ggsave(p,
-  filename = str_c(out_dir, "dotplot_donors.svg"),
-  device = "svg", width = 10, height = 11
-)
-
-################################################################################
-#                          Finding conserved markers                           #
-################################################################################
-
-find_d_i_m_in_sample <- function(cluster,
-                                 sample,
-                                 seurat_object) {
-  markers <- FindConservedMarkers(
-    subset(seurat_object, subset = orig.sample == sample),
-    ident.1 = cluster, only.pos = T, grouping.var = "donor", verbose = F
-  )
-  if (sample == "BM") sample <- "ybm"
-  markers <- markers[order(
-    markers[, str_c(sample, "1_avg_log2FC")],
-    markers[, str_c(sample, "2_avg_log2FC")],
-    decreasing = T
-  ), ]
-  return(markers)
-}
-
-# find donor-inspecific markers (d.i.m.)
-find_d_i_m_in_cluster <- function(cluster, seurat_object) {
-  print(cluster)
-  samples <- c("FL", "BM")
-  cluster_result <- lapply(samples, FUN = function(sample) {
-    find_d_i_m_in_sample(
-      cluster = cluster, sample = sample,
-      seurat_object = seurat_object
-    )
-  })
-  names(cluster_result) <- samples
-  return(cluster_result)
-}
-
-find_donor_inspecific_markers <- function(seurat_object, cluster_list) {
-  result <- lapply(cluster_list, FUN = function(cluster) {
-    find_d_i_m_in_cluster(
-      cluster = cluster,
-      seurat_object = seurat_object
-    )
-  })
-  names(result) <- cluster_list
-  return(result)
-}
-
-conserved_markers_list <- find_donor_inspecific_markers(
-  seurat_object = combined, cluster_list = fl_clusters
-)
-
-print(lapply(conserved_markers_list, function(x) lapply(x, function(y) dim(y))))
-
-cm_dir <- str_c(out_dir, "conserved_markers/")
-dir.create(cm_dir, recursive = T)
-write(toJSON(conserved_markers_list), str_c(
-  out_dir,
-  "conserved_markers_list.json"
-))
-
-for (cluster in fl_clusters) {
-  for (sample in samples) {
-    mlist <- getElement(
-      getElement(conserved_markers_list, name = cluster),
-      name = sample
-    )
-    print(str_c(cluster, ": ", sample))
-    print(dim(mlist))
-    write.table(
-      mlist,
-      file = str_c(
-        cm_dir, cluster, "_", sample, "_specific_markers.csv"
-      )
-    )
-  }
-}
-
-conserved_markers_list <- fromJSON(str_c(
-  out_dir, "conserved_markers_list.json"
-))
-
-################################################################################
-#          Using conserved markers to find DE markers between samples          #
-################################################################################
-
-find_markers_in_cluster <- function(cluster,
-                                    seurat_object) {
-  print(cluster)
-  result <- lapply(
-    list(
-      "combo_1" = c("BM", "FL"),
-      "combo_2" = c("FL", "BM")
-    ),
-    function(sample_pair) {
-      markers <- FindMarkers(
-        object = seurat_object,
-        ident.1 = str_c(sample_pair[1], "_", cluster),
-        ident.2 = str_c(sample_pair[2], "_", cluster),
-        features = rownames(getElement(
-          getElement(conserved_markers_list, name = cluster),
-          name = sample_pair[1]
-        )),
-        only.pos = T,
-        # logfc.threshold = fc_threshold,
-        verbose = F
-      )
-      markers <- markers[order(
-        markers[, "avg_log2FC"],
-        decreasing = T
-      ), ]
-      return(markers)
-    }
-  )
-  names(result) <- c("BM", "FL")
-  return(result)
-}
-
-find_markers <- function(seurat_object, cluster_list) {
-  Idents(seurat_object) <- "comparees"
-  result <- lapply(cluster_list, FUN = function(cluster) {
-    find_markers_in_cluster(
-      cluster = cluster,
-      seurat_object = seurat_object
-    )
-  })
-  names(result) <- cluster_list
-  return(result)
-}
-
-markers_list <- find_markers(
-  seurat_object = combined, cluster_list = fl_clusters
-)
-
-print(lapply(markers_list, function(x) lapply(x, function(y) dim(y))))
-
-write(toJSON(conserved_markers_list), str_c(
-  out_dir,
-  "markers_list_from_conserved_lists_only.json"
-))
-
-mcl_dir <- str_c(out_dir, "markers_with_genes_from_conserved_lists_only/")
-dir.create(mcl_dir, recursive = T)
-
-for (cluster in fl_clusters) {
-  for (sample in samples) {
-    mlist <- getElement(
-      getElement(markers_list, name = cluster),
-      name = sample
-    )
-    print(str_c(cluster, ": ", sample))
-    print(dim(mlist))
-    write.table(
-      mlist,
-      file = str_c(
-        mcl_dir, cluster, "_", sample, "_specific_markers.csv"
-      )
-    )
-  }
-}
-
-feats <- unlist(lapply(markers_list, function(x) {
-  lapply(x, function(y) {
-    head(rownames(y),
-      n = 2
-    )
-  })
-}))
-names(feats) <- NULL
-feats <- unique(feats)
-feats
-
-Idents(combined) <- "comparees"
-
-p <- DotPlot(combined,
-  features = feats, cols = c("blue", "red"),
-  group.by = "comparees", split.by = "orig.sample"
-) + RotatedAxis() + scale_y_discrete(limits = rev)
-p
-ggsave(p,
-  filename = str_c(mcl_dir, "dotplot_sample.svg"),
-  device = "svg", width = 10, height = 11
-)
-
-p <- DotPlot(combined,
-  features = feats, cols = c(
-    "magenta", "blue", "green", "brown"
-  ), group.by = "comparees", split.by = "donor"
-) + RotatedAxis() + scale_y_discrete(limits = rev)
-p
-ggsave(p,
-  filename = str_c(mcl_dir, "dotplot_donors.svg"),
-  device = "svg", width = 10, height = 11
-)
-
+# p <- DotPlot(combined,
+#   features = feats, cols = c(
+#     "magenta", "blue", "green", "brown"
+#   ), group.by = "comparees", split.by = "donor"
+# ) + RotatedAxis() + scale_y_discrete(limits = rev)
+# p
+# ggsave(p,
+#   filename = str_c(out_dir, "dotplot_donors.svg"),
+#   device = "svg", width = 10, height = 11
+# )

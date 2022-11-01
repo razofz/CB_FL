@@ -4,7 +4,7 @@ configfile: "config.yaml"
 DESEQ2_DIR = config["processed_dir"] + "DESeq2/results/"
 
 
-rule gather_pops:
+rule all:
     input:
         expand(
             DESEQ2_DIR + "Normed_counts/{fl_core_version}/{cluster}_DESeq_normed.txt",
@@ -25,6 +25,16 @@ rule gather_pops:
             DESEQ2_DIR + "{fl_core_version}/gated_{gate}_FL_yBM.csv",
             gate=config["gates_to_use"],
             fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+        ),
+        fetal_signature=expand(
+            DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
+            # fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+            fl_core_version=config["fl_cores"],
+        ),
+        adult_signature=expand(
+            DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
+            # fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+            fl_core_version=config["fl_cores"],
         ),
 
 
@@ -107,16 +117,16 @@ rule deseq_all_gated_pops:
         "src/DESeq2/1.2_All_gated_pops.R"
 
 
-rule gather_cores:
-    input:
-        fetal_signature=expand(
-            DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
-            fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
-        ),
-        adult_signature=expand(
-            DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
-            fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
-        ),
+# rule gather_cores:
+#     input:
+#         fetal_signature=expand(
+#             DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
+#             fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+#         ),
+#         adult_signature=expand(
+#             DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
+#             fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+#         ),
 
 
 rule deseq_produce_fl_core:
@@ -146,27 +156,55 @@ rule deseq_produce_fl_core:
         "src/DESeq2/1.3a_produce_FL_core.R"
 
 
-rule deseq_produce_fl_core:
+# not properly utilising smk features, due to time constraints
+rule single_cell_deg:
     input:
-        deseq_results=expand(
-            DESEQ2_DIR + "{fl_core_version}/{cluster}_FL_yBM.csv",
-            cluster=config["fl_clusters_to_use"],
-            allow_missing=True,
+        cite_cell_matrices_dir=config["raw_dir"] + "cite_cell_matrices/",
+        combined_metadata=config["raw_dir"] +
+        "paper_specific/from_seurat/FL_BM_combined_metadata.csv",
+        mapping_predictions=config["processed_dir"] +
+        "notebooks/mapping_predictions/RNA_FL_target_preds.json",
+        fl_metadata=config["processed_dir"] +
+        "seurat/CS22/FL_combined_metadata.csv",
+    output:
+        cells=expand(config["interim_dir"] +
+            "single_cell_deg/{sample}_cells.csv",
+            sample=config["samples"]
         ),
+        deg_results_bm=expand(
+            DESEQ2_DIR + "FLcoreSC/{cluster}_BM_specific_markers.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+        deg_results_fl=expand(
+            DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+    conda:
+        "envs/seurat.yaml"
+    threads:
+        4
+    script:
+        "src/DESeq2/0.1_sc_DEG.R"
+
+
+rule produce_sc_fl_core:
+    input:
+        deg_results_bm=rules.single_cell_deg.output.deg_results_bm,
+        deg_results_fl=rules.single_cell_deg.output.deg_results_fl,
     output:
         sub_setter_pos=expand(
-            DESEQ2_DIR + "sub_setter/{fl_core_version}/{cluster}_pos.csv",
+            DESEQ2_DIR + "sub_setter/FLcoreSC/{cluster}_pos.csv",
             cluster=config["fl_clusters_to_use"],
             allow_missing=True,
         ),
         sub_setter_neg=expand(
-            DESEQ2_DIR + "sub_setter/{fl_core_version}/{cluster}_neg.csv",
+            DESEQ2_DIR + "sub_setter/FLcoreSC/{cluster}_neg.csv",
             cluster=config["fl_clusters_to_use"],
             allow_missing=True,
         ),
-        de_genes=DESEQ2_DIR + "{fl_core_version}/DE_genes.csv",
-        adult_signature=DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
-        fetal_signature=DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
+        de_genes=DESEQ2_DIR + "FLcoreSC/DE_genes.csv",
+        adult_signature=DESEQ2_DIR + "FLcoreSC/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "FLcoreSC/Fetal_signature_p005.txt",
     conda:
         "envs/DESeq2.yaml"
     script:

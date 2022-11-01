@@ -8,8 +8,15 @@ fl_cores: [
   "FLcoreSC",
   "FLcorePseudotech"
 ]
+samples: [
+  "FL",
+  "yBM"
+]
 deseq_cutoffs:
   log2foldchange: 1
+  adjustedpvalue: 0.05
+seurat_deg_cutoffs:
+  log2foldchange: 0.25
   adjustedpvalue: 0.05
 fl_clusters_to_use: [
   "Cyc",
