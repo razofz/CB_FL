@@ -38,6 +38,8 @@ rule all:
             fl_core_version=config["fl_cores"],
         ),
         DESEQ2_PLOT_DIR + "PC12_singel_cell_clusters_top500.pdf",
+        DESEQ2_PLOT_DIR + "PC12_FL_BM_singel_cell_gates_top500.pdf",
+        config["external_dir"] + "BALL-1988S-HTSeq/subtypes.tsv",
 
 
 rule deseq_all_clustered_pops:
