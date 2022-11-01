@@ -40,6 +40,8 @@ rule all:
         DESEQ2_PLOT_DIR + "PC12_singel_cell_clusters_top500.pdf",
         DESEQ2_PLOT_DIR + "PC12_FL_BM_singel_cell_gates_top500.pdf",
         config["external_dir"] + "BALL-1988S-HTSeq/subtypes.tsv",
+        DESEQ2_PLOT_DIR + "PC1Age_All_leuk_FL_core.pdf",
+        DESEQ2_PLOT_DIR + "IndividualPC1_PC2_fetalcore_MLLAF4.pdf",
 
 
 rule deseq_all_clustered_pops:
@@ -308,6 +310,7 @@ rule plot_fl_bm_gates_pca:
     script:
         "src/DESeq2/3.2_investigate_FL_BM_gates_in_PCA.R"
 
+
 rule export_ball_excel_to_tsv:
     input:
         ball_xlsx=config["external_dir"] +
@@ -320,4 +323,75 @@ rule export_ball_excel_to_tsv:
     script:
         "src/DESeq2/4.0_export_excel_sheet_to_tsv.py"
 
+
+rule fetal_signature_in_leukemia:
+    input:
+        adult_signature=DESEQ2_DIR + "FLcorePseudotech/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "FLcorePseudotech/Fetal_signature_p005.txt",
+        ball_tsv=rules.export_ball_excel_to_tsv.output.ball_tsv,
+        ball_dir=config["external_dir"] + "BALL-1988S-HTSeq/",
+    output:
+        plot_pc12_prebatch=DESEQ2_PLOT_DIR +
+        "PC12_top500_preBatch_ALL_leuk.pdf",
+        plot_pc12_postbatch=DESEQ2_PLOT_DIR +
+        "PC12_top500_postBatch_ALL_leuk.pdf",
+        plot_pc1_age=DESEQ2_PLOT_DIR +
+        "PC1Age_All_leuk_FL_core.pdf",
+        plot_pc2_age=DESEQ2_PLOT_DIR +
+        "PC2Age_All_leuk_FL_core.pdf",
+        down_inf_leukemia=DESEQ2_DIR + "down_inf_luek.csv",
+        up_inf_leukemia=DESEQ2_DIR + "up_inf_luek.csv",
+        plot_heatmap_fl_sig=DESEQ2_PLOT_DIR +
+        "heatmap_A_fetal_sig_ALL_AF4.pdf",
+        plot_pc12_af4_fl_core=DESEQ2_PLOT_DIR +
+        "PC12_AF4_FL_core.pdf",
+        plot_pc1age_af4_fl_core=DESEQ2_PLOT_DIR +
+        "PC1Age_AF4_FL_core.pdf",
+        down_inf_leukemia_af4=DESEQ2_DIR + "down_inf_luek_AF4.csv",
+        up_inf_leukemia_af4=DESEQ2_DIR + "up_inf_luek_AF4.csv",
+        plot_heatmap_fl_sig_af4=DESEQ2_PLOT_DIR +
+        "heatmap_B_fetal_sig_ALL_AF4.pdf",
+        plot_heatmap_hox_genes_af4=DESEQ2_PLOT_DIR +
+        "heatmap_Hox_genes_AF4.pdf",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/4.1_fetal_signature_in_leukemia.R"
+
+
+rule fetal_signature_in_leukemia_pca_fl_core:
+    input:
+        adult_signature=DESEQ2_DIR + "FLcorePseudotech/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "FLcorePseudotech/Fetal_signature_p005.txt",
+        ball_tsv=rules.export_ball_excel_to_tsv.output.ball_tsv,
+        ball_dir=config["external_dir"] + "BALL-1988S-HTSeq/",
+    output:
+        plots_pc1=expand(DESEQ2_PLOT_DIR +
+            "IndividualPC1_fetalcore_{leuk_type}.pdf",
+            leuk_type=config["leukemia_types"],
+        ),
+        plots_pc1_gender=expand(DESEQ2_PLOT_DIR +
+            "IndividualPC1_fetalcore_{leuk_type}_gender.pdf",
+            leuk_type=config["leukemia_types"],
+        ),
+        plot_fl_core_same_pc1=DESEQ2_PLOT_DIR +
+        "fetalcore_samePC1_all.pdf",
+        plot_fl_core_same_pc1_gender=DESEQ2_PLOT_DIR +
+        "fetalcore_samePC1_all_gender.pdf",
+        plots_type=expand(DESEQ2_PLOT_DIR +
+            "{leuk_type}.pdf",
+            leuk_type=config["leukemia_types"],
+        ),
+        plots_type_gender=expand(DESEQ2_PLOT_DIR +
+            "{leuk_type}_gender.pdf",
+            leuk_type=config["leukemia_types"],
+        ),
+        plot_fl_core_mllaf4=DESEQ2_PLOT_DIR +
+        "IndividualPC1_PC2_fetalcore_MLLAF4.pdf",
+        plot_fl_core_mllaf4_gender=DESEQ2_PLOT_DIR +
+        "IndividualPC1_PC2_fetalcore_MLLAF4_gender.pdf",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/4.2_fetal_signature_in_leukemia_ind_PCA_fetalcore.R"
 

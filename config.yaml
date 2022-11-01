@@ -44,3 +44,12 @@ gates_to_use: [
   "MEP_123",
   "MEP_135"
 ]
+leukemia_types: [
+  "KMT2A-MLLT1",
+  "BCR-ABL1",
+  "KMT2A-AFF1",
+  "High hyperdiploid",
+  "Low hyperdiploid",
+  "ETV6-RUNX1",
+  "KMT2A-MLLT3"
+]
