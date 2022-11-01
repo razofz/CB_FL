@@ -2,6 +2,7 @@ configfile: "config.yaml"
 
 
 DESEQ2_DIR = config["processed_dir"] + "DESeq2/results/"
+DESEQ2_PLOT_DIR = config["processed_dir"] + "DESeq2/images/"
 
 
 rule all:
@@ -209,3 +210,47 @@ rule produce_sc_fl_core:
         "envs/DESeq2.yaml"
     script:
         "src/DESeq2/1.3b_produce_sc_FL_core.R"
+
+rule plot_pca:
+    input:
+        cts_files_cluster=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/cluster_wise/"
+            + "{cluster}_cts_all_hpc.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+        coldata_files_cluster=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/cluster_wise/"
+            + "{cluster}_coldata_all_hpc.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+        cts_files_gate=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/gate_wise/"
+            + "{gate}_cts_all_hpc.csv",
+            gate=config["gates_to_use"],
+        ),
+        coldata_files_gate=expand(
+            config["raw_dir"]
+            + "paper_specific/DESeq2/gate_wise/"
+            + "{gate}_coldata_all_hpc.csv",
+            gate=config["gates_to_use"],
+        ),
+    output:
+        plot_pc12_cluster=DESEQ2_PLOT_DIR +
+        "PC12_singel_cell_clusters_top500.pdf",
+        plot_pc23_cluster=DESEQ2_PLOT_DIR +
+        "PC23_singel_cell_clusters_top500.pdf",
+        plot_pc12_gate=DESEQ2_PLOT_DIR +
+        "PC12_singel_cell_gates_top500.pdf",
+        plot_pc23_gate=DESEQ2_PLOT_DIR +
+        "PC23_singel_cell_gates_top500.pdf",
+        plot_pc12_both=DESEQ2_PLOT_DIR +
+        "PC12_singel_cell_clusters_gates_top500.pdf",
+        plot_pc23_both=DESEQ2_PLOT_DIR +
+        "PC23_singel_cell_clusters_gates_top500.pdf",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/2.1_plot_pca.R"
