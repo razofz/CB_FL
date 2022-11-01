@@ -12,6 +12,7 @@ cts_files <- snakemake@input[["cts_files"]]
 coldata_files <- snakemake@input[["coldata_files"]]
 normed_counts_files <- snakemake@output[["normed_counts"]]
 deseq_results_files <- snakemake@output[["deseq_results"]]
+gsea_fc_rnk_files <- snakemake@output[["gsea_fc_rnk"]]
 
 print(clusters)
 
@@ -47,8 +48,16 @@ named_deseq_results_files <- unlist(
     }
   )
 )
-names(named_normed_counts_files) <- clusters
+named_gsea_fc_rnk_files <- unlist(
+  lapply(clusters,
+    FUN = function(cl) {
+      gsea_fc_rnk_files[str_detect(gsea_fc_rnk_files, str_c(cl, "_"))]
+    }
+  )
+)
 names(named_deseq_results_files) <- clusters
+names(named_normed_counts_files) <- clusters
+names(named_gsea_fc_rnk_files) <- clusters
 
 if (snakemake@wildcards[["fl_core_version"]] == "FLcorePseudotech") {
   deseq_design <- ~ pseudo_rep + sample
@@ -72,6 +81,16 @@ for (cluster in clusters) {
     named_deseq_results_files[cluster],
     sep = ","
   )
+
+  # create dataframe containing log2 fold change and no NAs for GSEA
+  res_table <- data.frame(res)
+  res_table <- subset.data.frame(res_table, select = "log2FoldChange")
+  res_table <- na.omit(res_table)
+  write.table(res_table,
+    file = named_gsea_fc_rnk_files[[cluster]],
+    sep = "\t"
+  )
+
   norm_counts <- counts(dds, normalized = T)
   write.table(norm_counts,
     file = named_normed_counts_files[cluster],
@@ -116,19 +135,10 @@ coldata_combined <- coldata_combined[!grepl(
 coldata_combined <- coldata_combined[!grepl(
   pattern = "_T_", x = rownames(coldata_combined)
 ), ]
-# if (snakemake@wildcards[["fl_core_version"]] == "FLcoreNoPseudotech") {
-#   cts_combined <- cts_combined[!grepl(
-#     pattern = "yBM_", x = colnames(cts_combined)
-#   )]
-#   coldata_combined <- coldata_combined[!grepl(
-#     pattern = "yBM_", x = rownames(coldata_combined)
-#   ), ]
-# }
 
 dds <- DESeqDataSetFromMatrix(
   countData = cts_combined, colData = coldata_combined,
   design = deseq_design
-  # design = ~pseudo_rep + sample
 )
 
 dds <- DESeq(dds)
@@ -136,6 +146,33 @@ dds <- DESeq(dds)
 norm_counts <- counts(dds, normalized = T)
 write.table(norm_counts,
   file = snakemake@output[["fl_only_normed_counts"]],
-  # file = paste0(out_dir, "/results/Normed_counts/", "only_FL_DEseq_normed.txt"),
   append = F, sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE
 )
+
+# GSEA stuff
+
+# dds@colData$cluster_name <- as.factor(dds@colData$cluster_name)
+
+# res <- results(dds, contrast = c("cluster_name", "MPP.I", "HSC"))
+
+# # create dataframe containing log2 fold change and no NAs for GSEA
+# res_table <- data.frame(res)
+# res_table <- subset.data.frame(res_table, select = "log2FoldChange")
+# res_table <- na.omit(res_table)
+# write.table(res_table,
+#   # paste0(out_dir, "/results/", "FL_MPPI_HSC.rnk"),
+#   snakemake@output[["mpp1_hsc_rnk"]],
+#   sep = "\t"
+# )
+
+# res <- results(dds, contrast = c("cluster_name", "MPP.I", "MPP.II"))
+
+# res_table <- data.frame(res)
+# res_table <- subset.data.frame(res_table, select = "log2FoldChange")
+# res_table <- na.omit(res_table)
+
+# write.table(res_table,
+#   # paste0(out_dir, "/results/", "FL_MPPI_MPPII.rnk"),
+#   snakemake@output[["mpp1_mpp2_rnk"]],
+#   sep = "\t"
+# )

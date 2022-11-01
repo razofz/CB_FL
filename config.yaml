@@ -8,6 +8,9 @@ fl_cores: [
   "FLcoreSC",
   "FLcorePseudotech"
 ]
+deseq_cutoffs:
+  log2foldchange: 1
+  adjustedpvalue: 0.05
 fl_clusters_to_use: [
   "Cyc",
   "DC.Mono",
@@ -18,4 +21,19 @@ fl_clusters_to_use: [
   "MEP",
   "MPP.I",
   "MPP.II"
+]
+gates_to_use: [
+  "CD7_CLP",
+  "CD10_CLP",
+  "CD38neg_MPP",
+  "CD49Fpos_HSC",
+  "CD90pos_HSC",
+  "CMP_123",
+  "CMP_135",
+  "GMP_123",
+  "GMP_135",
+  "IL7RA_CLP",
+  "LMPP",
+  "MEP_123",
+  "MEP_135"
 ]
