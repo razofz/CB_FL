@@ -393,7 +393,21 @@ rule fetal_signature_in_leukemia_random_genes:
         ball_dir=config["external_dir"] + "BALL-1988S-HTSeq/",
     output:
         random_genes=expand(
-            DESEQ2_PLOT_DIR + "random_{i}.csv", i=list(range(1, 5))
+            DESEQ2_PLOT_DIR + "random_{i}.csv", i=list(range(1, 6))
+        ),
+        plots_random_pc1_all=expand(
+            DESEQ2_PLOT_DIR + "random_samePC1_all_{i}.pdf",
+            i=list(range(1, 6))
+        ),
+        plots_random_pc1_type=expand(
+            DESEQ2_PLOT_DIR + "random_PC1_{leuk_type}_{i}.pdf",
+            i=list(range(1, 6)),
+            leuk_type=config["leukemia_types"],
+        ),
+        plots_random_pc1_type_type=expand(
+            DESEQ2_PLOT_DIR + "{leuk_type}_random_samePC1_{leuk_type}_{i}.pdf",
+            i=list(range(1, 6)),
+            leuk_type=config["leukemia_types"],
         ),
     conda:
         "envs/DESeq2.yaml"
