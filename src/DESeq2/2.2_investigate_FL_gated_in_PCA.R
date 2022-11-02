@@ -78,10 +78,8 @@ d_FL <- data.frame(
     colnames(vsd_FL_gate)
 )
 loading_FL <- data.frame(
-  LO1 = pca_FL$rotation[, 1], LO2 = pca_FL$rotation[
-    ,
-    2
-  ], LO3 = pca_FL$rotation[, 3], name =
+  LO1 = pca_FL$rotation[, 1], LO2 = pca_FL$rotation[, 2],
+  LO3 = pca_FL$rotation[, 3], name =
     rownames(pca_FL$rotation)
 )
 
@@ -121,8 +119,7 @@ ggsave(paste0(images_dir, "/PC12_singel_cell_gates_top500.pdf"),
 
 ggplot(data = d_FL, aes_string(x = "PC2", y = "PC3", shape = "sample")) +
   geom_point(aes_string(fill = "gate_name"),
-    color = "black", shape = 21, size =
-      5
+    color = "black", shape = 21, size = 5
   ) +
   xlab(paste0("PC2: ", round(percentVar_FL[2] * 100), "% variance")) +
   ylab(paste0("PC3: ", round(percentVar_FL[3] * 100), "% variance")) +
