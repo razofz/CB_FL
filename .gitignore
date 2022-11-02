@@ -95,4 +95,6 @@ project_path
 figures/*.pdf
 
 figures/figure_renaming_auto_converted_from_ods.csv
+figures/figures/
 .snakemake
+
