@@ -1,8 +1,85 @@
 configfile: "config.yaml"
 
 
+import json
+import shutil
+
+
 DESEQ2_DIR = config["processed_dir"] + "DESeq2/results/"
 DESEQ2_PLOT_DIR = config["processed_dir"] + "DESeq2/images/"
+NOTEBOOKS_PLOT_DIR = config["processed_dir"] + "/notebooks/Figures/"
+GLOBAL_FIGURES_DIR = "figures/figures/"
+
+NOTEBOOKS_PLOT_DIR = "data/processed/notebooks/Figures/"
+DESEQ2_PLOT_DIR = "data/processed/DESeq2/images/"
+GLOBAL_FIGURES_DIR = "figures/figures/"
+
+
+figures = json.load(open("figures/figures.json", "r"))
+
+def get_paper_figures_indices(figures_dict):
+    pdfs = []
+    svgs = []
+    for k, v in figures_dict.items():
+        if v["origin"] == "py":
+            svgs.append(k)
+        elif v["origin"] == "DEseq":
+            pdfs.append(k)
+
+    return()
+
+in_out_pairs = []
+ins = []
+outs = []
+ins_dict = {}
+outs_dict = {}
+indices = []
+for figure in list(figures.keys()):
+    # print(figure)
+    if figures[figure]["origin"] not in ["py", "DEseq"]:
+        ...
+        # print(f"Skipping: {figure} {figures[figure]=}")
+    else:
+        if figures[figure]["origin"] == "py":
+            path = NOTEBOOKS_PLOT_DIR
+            ft = ".svg"
+        elif figures[figure]["origin"] == "DEseq":
+            path = DESEQ2_PLOT_DIR
+            ft = ".pdf"
+        i = 1
+        for fn in figures[figure]["filenames"]:
+            idx = ""
+            infile = path + fn + ft
+            idx = figure + ( str(i) if len(figures[figure]["filenames"]) > 1 else "")
+            outfile = GLOBAL_FIGURES_DIR + idx + "_" + fn + ft
+            # print(infile, "\t" + outfile)
+            in_out_pairs.append((infile, outfile))
+            ins.append(infile)
+            outs.append(outfile)
+            indices.append(idx)
+            ins_dict[idx] = infile
+            outs_dict[idx] = outfile
+            i += 1
+
+# key_use = ""
+# for k, v in outs_dict.items():
+#     # print(k, v)
+#     if indices[2] in v:
+#         key_use = k
+#         print(key_use)
+# print(ins_dict[key_use])
+# print(outs_dict[key_use])
+# assert ins_dict[key_use].split("/")[-1] in outs_dict[key_use]
+
+# paper_figures =
+
+# rule gather_figures:
+#     input:
+#         outs,
+
+
+def get_file(wildcards):
+    return ins_dict[wildcards.figure]
 
 
 rule all:
@@ -42,6 +119,46 @@ rule all:
         DESEQ2_PLOT_DIR + "PC1Age_All_leuk_FL_core.pdf",
         DESEQ2_PLOT_DIR + "IndividualPC1_PC2_fetalcore_MLLAF4.pdf",
         DESEQ2_PLOT_DIR + "Main_Figure_5a.pdf",
+        expand(
+            DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+        expand(
+            DESEQ2_PLOT_DIR
+            + "PC1_variance_test_all_leuk_in_PCA_its_{iters}.pdf",
+            iters=config["random_params"]["iterations"],
+        ),
+        DESEQ2_DIR + "Pvals_anova_FL_up2.csv",
+        outs,
+
+
+rule gather_figures:
+    input:
+        # source_file=get_file,
+        # source=ins_dict["{figure,Figure[0-9]+[a-z]+[0-9]+\_}"],
+        ins=ins,
+    output:
+        outs=outs
+    run:
+        for out_file in output.outs:
+            key_use = ""
+            for k, v in outs_dict.items():
+                # print(k, v)
+                if out_file in v:
+                    key_use = k
+                    print(key_use)
+            source = ins_dict[key_use]
+            destination = outs_dict[key_use]
+            assert source.split("/")[-1] in destination
+            shutil.copy(source, destination)
+
+        # destination=expand(outs_dict[figure],
+        #                    figure=indices)
+        # destination_file="figures/figures/{figure,Figure[0-9]+[a-z]+[0-9]+}_{etc}",
+    # params:
+    #     figure = indices
+    # shell:
+    #     "cp {input.source_file} {output.destination_file}"
 
 
 rule deseq_all_clustered_pops:
@@ -397,8 +514,7 @@ rule fetal_signature_in_leukemia_random_genes:
             DESEQ2_PLOT_DIR + "random_{i}.csv", i=list(range(1, 6))
         ),
         plots_random_pc1_all=expand(
-            DESEQ2_PLOT_DIR + "random_samePC1_all_{i}.pdf",
-            i=list(range(1, 6))
+            DESEQ2_PLOT_DIR + "random_samePC1_all_{i}.pdf", i=list(range(1, 6))
         ),
         plots_random_pc1_type=expand(
             DESEQ2_PLOT_DIR + "random_PC1_{leuk_type}_{i}.pdf",
@@ -427,3 +543,53 @@ rule plot_main_fig5:
         "envs/DESeq2.yaml"
     script:
         "src/DESeq2/5.1_dev_cell_heatmap.R"
+
+
+rule rev_stat_test_distributions_pc:
+    input:
+        adult_signature=DESEQ2_DIR + "FLcorePseudotech/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "FLcorePseudotech/Fetal_signature_p005.txt",
+        ball_tsv=rules.export_ball_excel_to_tsv.output.ball_tsv,
+        ball_dir=config["external_dir"] + "BALL-1988S-HTSeq/",
+    output:
+        plots_random_pc1_variance=expand(
+            DESEQ2_PLOT_DIR + "PC1_variance_test_{leuk_type}_its_{iters}.pdf",
+            leuk_type=config["leukemia_types"],
+            iters=config["random_params"]["iterations"],
+        ),
+        plot_same_pc1=expand(
+            DESEQ2_PLOT_DIR
+            + "PC1_variance_test_all_leuk_in_PCA_its_{iters}.pdf",
+            iters=config["random_params"]["iterations"],
+        ),
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/6.1_rev_stat_test_distributions_PC.R"
+
+
+types_oi = ["KMT2A-AFF1", "BCR-ABL1", "High hyperdiploid"]
+
+rule rev_fetal_core_box_plots:
+    input:
+        adult_signature=DESEQ2_DIR + "FLcorePseudotech/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "FLcorePseudotech/Fetal_signature_p005.txt",
+        ball_tsv=rules.export_ball_excel_to_tsv.output.ball_tsv,
+        ball_dir=config["external_dir"] + "BALL-1988S-HTSeq/",
+    output:
+        plots_up=expand(
+            DESEQ2_PLOT_DIR + "Fetal_core_up_box_plot_{leuk_type}.pdf",
+            leuk_type=types_oi,
+        ),
+        plots_down=expand(
+            DESEQ2_PLOT_DIR + "Fetal_core_down_box_plot_{leuk_type}.pdf",
+            leuk_type=types_oi,
+        ),
+        pvals_up=DESEQ2_DIR + "Pvals_anova_FL_up2.csv",
+        pvals_down=DESEQ2_DIR + "Pvals_anova_FL_down2.csv",
+    params:
+        types_oi=types_oi
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/6.2_rev_fetal_core_boxplots_final.R"
