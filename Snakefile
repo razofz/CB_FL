@@ -41,6 +41,7 @@ rule all:
         DESEQ2_PLOT_DIR + "PC12_FL_BM_singel_cell_gates_top500.pdf",
         DESEQ2_PLOT_DIR + "PC1Age_All_leuk_FL_core.pdf",
         DESEQ2_PLOT_DIR + "IndividualPC1_PC2_fetalcore_MLLAF4.pdf",
+        DESEQ2_PLOT_DIR + "Main_Figure_5a.pdf",
 
 
 rule deseq_all_clustered_pops:
@@ -413,3 +414,16 @@ rule fetal_signature_in_leukemia_random_genes:
         "envs/DESeq2.yaml"
     script:
         "src/DESeq2/4.3_fetal_signature_in_leukemia_randomgenes.R"
+
+
+rule plot_main_fig5:
+    input:
+        deg=DESEQ2_DIR + "FLcorePseudotech/DE_genes.csv",
+        samples=config["external_dir"] + "iPS_ETVRUNX/dev_cell_samples.txt",
+        fpkm=config["external_dir"] + "iPS_ETVRUNX/fpkm.tsv",
+    output:
+        plot_fig5=DESEQ2_PLOT_DIR + "Main_Figure_5a.pdf",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/5.1_dev_cell_heatmap.R"
