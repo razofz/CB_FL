@@ -223,7 +223,8 @@ categories_to_show <- as.data.frame(colData(vsd)[, c(
   "age_group", "gender", "type"
 )])
 categories_color <- list(
-  gender = c("Male" = "#F8766D", "Female" = "#7CAE00"),
+  gender = c("Male" = "#2E3192", "Female" = "#BE1E2D"),
+  # gender = c("Male" = "#F8766D", "Female" = "#7CAE00"),
   age_group = c(
     "0-2" = "#F8766D", "2-16" = "#7CAE00", "16-40" = "#00BFC4",
     ">40" = "#C77CFF"
@@ -339,7 +340,8 @@ categories_to_show_af4 <- as.data.frame(colData(vsd)[, c(
   "gender"
 )])
 categories_color_af4 <- list(
-  gender = c("Male" = "#F8766D", "Female" = "#7CAE00"),
+  # gender = c("Male" = "#F8766D", "Female" = "#7CAE00"),
+  gender = c("Male" = "#2E3192", "Female" = "#BE1E2D"),
   age_group = c(
     "0-2" = "#F8766D", "2-16" = "#7CAE00",
     "16-40" = "#00BFC4", ">40" = "#C77CFF"
@@ -388,7 +390,6 @@ ensm_to_sym_hox <- data.frame(
     mart = ensembl
   )
 )
-
 
 pheatmap(assay(vsd)[select_hox, select_aff4],
   cluster_rows = TRUE,

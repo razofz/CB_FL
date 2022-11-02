@@ -12,7 +12,7 @@ invisible(lapply(list(
 
 set.seed(snakemake@config[["seed"]])
 
-images_dir <- dirname(snakemake@output[["plot_fl_core_mllaf4"]])
+# images_dir <- dirname(snakemake@output[["plot_fl_core_mllaf4"]])
 
 plots_pc1 <- snakemake@output[["plots_pc1"]]
 plots_pc1_gender <- snakemake@output[["plots_pc1_gender"]]
@@ -177,7 +177,9 @@ age_colours <- c(
 # IndividualPC1_fetalcore_Low hyperdiploid  IndividualPC1_fetalcore_ETV6-RUNX1
 # IndividualPC1_fetalcore_KMT2A-MLLT3
 
-# subset vsd3 object and perform PCA individually using the GOI
+stopifnot(all(unique(vsd$type) %in% leukemia_types))
+
+# subset vsd object and perform PCA individually using the GOI
 for (x in 1:length(unique(vsd$type))) {
   print(x)
   print(unique(vsd$type)[x])
@@ -310,8 +312,7 @@ f <- ggplot(data = principal, aes_string(
   coord_fixed()
 ggsave(snakemake@output[["plot_fl_core_same_pc1_gender"]],
   # ggsave(str_c(images_dir, "/fetalcore_samePC1_all_gender.pdf"),
-  plot =
-    last_plot()
+  plot = f
 )
 
 # fig 5b, left
@@ -328,7 +329,7 @@ f <- ggplot(data = principal, aes_string(
   xlim(-38, 38) +
   ylim(-1, 82) +
   coord_fixed()
-ggsave(snakemake@output[["plot_fl_core_same_pc1"]], plot = last_plot())
+ggsave(snakemake@output[["plot_fl_core_same_pc1"]], plot = f)
 # ggsave(str_c(images_dir, "/fetalcore_samePC1_all.pdf"), plot = last_plot())
 
 # loop over the subtypes and plot them individually in the same PCA space
@@ -430,7 +431,7 @@ p2 <- ggplot(data = principal, aes_string(
   xlim(-25, 27) +
   ylim(-24, 22) +
   coord_fixed()
-ggsave(snakemake@output[["plot_fl_core_mllaf4_gender"]],
+ggsave(snakemake@output[["plot_fl_core_mllaf4"]],
   # ggsave(paste0(images_dir, "/IndividualPC1_PC2_fetalcore_MLLAF4.pdf"),
   plot = p2
 )
