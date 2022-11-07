@@ -17,28 +17,11 @@ GLOBAL_FIGURES_DIR = "figures/figures/"
 
 figures = json.load(open("figures/figures.json", "r"))
 
-def get_paper_figures_indices(figures_dict):
-    pdfs = []
-    svgs = []
-    for k, v in figures_dict.items():
-        if v["origin"] == "py":
-            svgs.append(k)
-        elif v["origin"] == "DEseq":
-            pdfs.append(k)
-
-    return()
-
-in_out_pairs = []
 ins = []
 outs = []
-ins_dict = {}
-outs_dict = {}
-indices = []
 for figure in list(figures.keys()):
-    # print(figure)
     if figures[figure]["origin"] not in ["py", "DEseq"]:
         ...
-        # print(f"Skipping: {figure} {figures[figure]=}")
     else:
         if figures[figure]["origin"] == "py":
             path = NOTEBOOKS_PLOT_DIR
@@ -50,39 +33,13 @@ for figure in list(figures.keys()):
         for fn in figures[figure]["filenames"]:
             idx = ""
             infile = path + fn + ft
-            idx = figure + ( str(i) if len(figures[figure]["filenames"]) > 1 else "")
+            idx = figure + (
+                str(i) if len(figures[figure]["filenames"]) > 1 else ""
+            )
             outfile = GLOBAL_FIGURES_DIR + idx + "_" + fn + ft
-            # print(infile, "\t" + outfile)
-            in_out_pairs.append((infile, outfile))
             ins.append(infile)
             outs.append(outfile)
-            indices.append(idx)
-            ins_dict[idx] = infile
-            outs_dict[idx] = outfile
             i += 1
-
-# print(ins)
-# print(outs)
-
-# key_use = ""
-# for k, v in outs_dict.items():
-#     # print(k, v)
-#     if indices[2] in v:
-#         key_use = k
-#         print(key_use)
-# print(ins_dict[key_use])
-# print(outs_dict[key_use])
-# assert ins_dict[key_use].split("/")[-1] in outs_dict[key_use]
-
-# paper_figures =
-
-# rule gather_figures:
-#     input:
-#         outs,
-
-
-def get_file(wildcards):
-    return ins_dict[wildcards.figure]
 
 
 rule all:
@@ -127,9 +84,7 @@ rule all:
             DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers.csv",
             cluster=config["fl_clusters_to_use"],
         ),
-        expand(
-            DESEQ2_PLOT_DIR + "random_{i}.csv", i=list(range(1, 6))
-        ),
+        expand(DESEQ2_PLOT_DIR + "random_{i}.csv", i=list(range(1, 6))),
         expand(
             DESEQ2_PLOT_DIR
             + "PC1_variance_test_all_leuk_in_PCA_its_{iters}.pdf",
@@ -141,16 +96,13 @@ rule all:
 
 rule gather_figures:
     input:
-        # source_file=get_file,
-        # source=ins_dict["{figure,Figure[0-9]+[a-z]+[0-9]+\_}"],
         ins=ins,
     output:
-        outs=outs
+        outs=outs,
     run:
         for out_file in output.outs:
             key_use = ""
             for k, v in outs_dict.items():
-                # print(k, v)
                 if out_file in v:
                     key_use = k
                     print(key_use)
@@ -158,14 +110,6 @@ rule gather_figures:
             destination = outs_dict[key_use]
             assert source.split("/")[-1] in destination
             shutil.copy(source, destination)
-
-        # destination=expand(outs_dict[figure],
-        #                    figure=indices)
-        # destination_file="figures/figures/{figure,Figure[0-9]+[a-z]+[0-9]+}_{etc}",
-    # params:
-    #     figure = indices
-    # shell:
-    #     "cp {input.source_file} {output.destination_file}"
 
 
 rule deseq_all_clustered_pops:
@@ -250,18 +194,6 @@ rule deseq_all_gated_pops:
         "src/DESeq2/1.2_All_gated_pops.R"
 
 
-# rule gather_cores:
-#     input:
-#         fetal_signature=expand(
-#             DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
-#             fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
-#         ),
-#         adult_signature=expand(
-#             DESEQ2_DIR + "{fl_core_version}/Adult_signature_p005.txt",
-#             fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
-#         ),
-
-
 rule deseq_produce_fl_core:
     input:
         deseq_results=expand(
@@ -294,8 +226,7 @@ rule deseq_produce_fl_core:
 rule single_cell_deg:
     input:
         cite_cell_matrices=expand(
-            config["raw_dir"]
-            + "cite_cell_matrices/{donor}_hpc/",
+            config["raw_dir"] + "cite_cell_matrices/{donor}_hpc/",
             donor=config["donors"],
         ),
         combined_metadata=config["raw_dir"]
@@ -580,6 +511,7 @@ rule rev_stat_test_distributions_pc:
 
 types_oi = ["KMT2A-AFF1", "BCR-ABL1", "High hyperdiploid"]
 
+
 rule rev_fetal_core_box_plots:
     input:
         adult_signature=DESEQ2_DIR + "FLcorePseudotech/Adult_signature_p005.txt",
@@ -598,7 +530,7 @@ rule rev_fetal_core_box_plots:
         pvals_up=DESEQ2_DIR + "Pvals_anova_FL_up2.csv",
         pvals_down=DESEQ2_DIR + "Pvals_anova_FL_down2.csv",
     params:
-        types_oi=types_oi
+        types_oi=types_oi,
     conda:
         "envs/DESeq2.yaml"
     script:
