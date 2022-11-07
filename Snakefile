@@ -61,6 +61,9 @@ for figure in list(figures.keys()):
             outs_dict[idx] = outfile
             i += 1
 
+# print(ins)
+# print(outs)
+
 # key_use = ""
 # for k, v in outs_dict.items():
 #     # print(k, v)
@@ -116,12 +119,16 @@ rule all:
         ),
         DESEQ2_PLOT_DIR + "PC12_singel_cell_clusters_top500.pdf",
         DESEQ2_PLOT_DIR + "PC12_FL_BM_singel_cell_gates_top500.pdf",
+        DESEQ2_PLOT_DIR + "PC12_FL_BM_singel_cell_gates_top500.pdf",
         DESEQ2_PLOT_DIR + "PC1Age_All_leuk_FL_core.pdf",
         DESEQ2_PLOT_DIR + "IndividualPC1_PC2_fetalcore_MLLAF4.pdf",
         DESEQ2_PLOT_DIR + "Main_Figure_5a.pdf",
         expand(
             DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers.csv",
             cluster=config["fl_clusters_to_use"],
+        ),
+        expand(
+            DESEQ2_PLOT_DIR + "random_{i}.csv", i=list(range(1, 6))
         ),
         expand(
             DESEQ2_PLOT_DIR
@@ -284,20 +291,23 @@ rule deseq_produce_fl_core:
         "src/DESeq2/1.3a_produce_FL_core.R"
 
 
-# not properly utilising smk features, due to time constraints
 rule single_cell_deg:
     input:
-        cite_cell_matrices_dir=config["raw_dir"] + "cite_cell_matrices/",
+        cite_cell_matrices=expand(
+            config["raw_dir"]
+            + "cite_cell_matrices/{donor}_hpc/",
+            donor=config["donors"],
+        ),
         combined_metadata=config["raw_dir"]
         + "paper_specific/from_seurat/FL_BM_combined_metadata.csv",
+        fl_metadata=config["raw_dir"]
+        + "paper_specific/from_seurat/FL_combined_metadata.csv",
         mapping_predictions=config["processed_dir"]
         + "notebooks/mapping_predictions/RNA_FL_target_preds.json",
-        fl_metadata=config["processed_dir"]
-        + "seurat/CS22/FL_combined_metadata.csv",
     output:
         cells=expand(
-            config["interim_dir"] + "single_cell_deg/{sample}_cells.csv",
-            sample=config["samples"],
+            config["interim_dir"] + "single_cell_deg/{donor}_cells.csv",
+            donor=config["donors"],
         ),
         deg_results_bm=expand(
             DESEQ2_DIR + "FLcoreSC/{cluster}_BM_specific_markers.csv",
