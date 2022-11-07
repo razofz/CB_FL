@@ -5,8 +5,6 @@ invisible(lapply(list(
   suppressPackageStartupMessages(library(x, character.only = T))
 }))
 
-# comparison DEseq2 res Pseudo bulking approaches
-
 set.seed(snakemake@config[["seed"]])
 clusters <- snakemake@config[["fl_clusters_to_use"]]
 deg_results_bm_files <- snakemake@input[["deg_results_bm"]]
@@ -55,14 +53,14 @@ names(deg_results_fl) <- clusters
 sub_setter_pos <- function(df) {
   df_sub <- df[!is.na(df$p_val_adj), ]
   df_sub <- df_sub[
-    df_sub$avg_log2FC > fc_threshold, #& df_sub$p_val_adj < padj_threshold,
+    df_sub$avg_log2FC > fc_threshold,
   ]
   return(df_sub)
 }
 sub_setter_neg <- function(df) {
   df_sub <- df[!is.na(df$p_val_adj), ]
   df_sub <- df_sub[
-    df_sub$avg_log2FC > fc_threshold, #& df_sub$p_val_adj < padj_threshold,
+    df_sub$avg_log2FC > fc_threshold,
   ]
   return(df_sub)
 }
