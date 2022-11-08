@@ -23,6 +23,7 @@ deseq_cutoffs:
   adjustedpvalue: 0.05
 seurat_deg_cutoffs:
   log2foldchange: 0.25
+  adjustedpvalue: 0.05
 random_params:
   iterations: 10000
 fl_clusters_to_use: [

@@ -10,11 +10,6 @@ DESEQ2_PLOT_DIR = config["processed_dir"] + "DESeq2/images/"
 NOTEBOOKS_PLOT_DIR = config["processed_dir"] + "/notebooks/Figures/"
 GLOBAL_FIGURES_DIR = "figures/figures/"
 
-NOTEBOOKS_PLOT_DIR = "data/processed/notebooks/Figures/"
-DESEQ2_PLOT_DIR = "data/processed/DESeq2/images/"
-GLOBAL_FIGURES_DIR = "figures/figures/"
-
-
 figures = json.load(open("figures/figures.json", "r"))
 
 ins = []
@@ -91,6 +86,7 @@ rule all:
             iters=config["random_params"]["iterations"],
         ),
         DESEQ2_DIR + "Pvals_anova_FL_up2.csv",
+        DESEQ2_PLOT_DIR + "FLcoreSC/PCA_top500.pdf",
         outs,
 
 
@@ -535,3 +531,33 @@ rule rev_fetal_core_box_plots:
         "envs/DESeq2.yaml"
     script:
         "src/DESeq2/6.2_rev_fetal_core_boxplots_final.R"
+
+
+rule runx_pca_plots_sc:
+    input:
+        adult_signature=rules.produce_sc_fl_core.output.adult_signature,
+        fetal_signature=rules.produce_sc_fl_core.output.fetal_signature,
+        samples=config["external_dir"] + "iPS_ETVRUNX/dev_cell_samples.txt",
+        fpkm=config["external_dir"] + "iPS_ETVRUNX/fpkm.tsv",
+    output:
+        plot_top500=DESEQ2_PLOT_DIR + "FLcoreSC/PCA_top500.pdf",
+        plot_subset500=DESEQ2_PLOT_DIR + "FLcoreSC/PCA_pseudorep_core_rem_after_top500.pdf",
+        plot_core=DESEQ2_PLOT_DIR + "FLcoreSC/PCA_pseudoreps_core.pdf",
+        overlapping_genes=DESEQ2_DIR +
+        "FLcoreSC/overlapping_genes_pseudoreps_core.csv",
+        plots_random=expand(
+            DESEQ2_PLOT_DIR +
+            "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.pdf",
+            fl_core_version="FLcoreSC",
+            i=list(range(1, 6))
+        ),
+        csvs_random=expand(
+            DESEQ2_DIR +
+            "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
+            fl_core_version="FLcoreSC",
+            i=list(range(1, 6))
+        ),
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/5.2_runx1_pca.R"
