@@ -247,6 +247,7 @@ for (cluster in fl_clusters) {
   # for (cluster in c("HSC")) {
   print(cluster)
   fc_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["log2foldchange"]]
+  padj_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["adjustedpvalue"]]
   formatted_cluster <- str_replace(
     pattern = "-",
     replacement = ".",
@@ -260,6 +261,7 @@ for (cluster in fl_clusters) {
     verbose = FALSE
   )
   markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
+  markers <- markers[markers$p_val_adj < padj_threshold, ]
   print(named_deg_results_bm[[formatted_cluster]])
   write.table(markers, file = named_deg_results_bm[[formatted_cluster]])
   markers <- FindMarkers(combined,
@@ -270,6 +272,7 @@ for (cluster in fl_clusters) {
     verbose = FALSE
   )
   markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
+  markers <- markers[markers$p_val_adj < padj_threshold, ]
   print(named_deg_results_fl[[formatted_cluster]])
   write.table(markers, file = named_deg_results_fl[[formatted_cluster]])
 }

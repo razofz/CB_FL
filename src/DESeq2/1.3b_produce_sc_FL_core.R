@@ -13,6 +13,7 @@ sub_setter_pos_files <- snakemake@output[["sub_setter_pos"]]
 sub_setter_neg_files <- snakemake@output[["sub_setter_neg"]]
 
 fc_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["log2foldchange"]]
+padj_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["adjustedpvalue"]]
 
 make_named_version <- function(ids, file_list, pattern = "_") {
   named_file_list <- unlist(
@@ -50,27 +51,20 @@ deg_results_fl <- lapply(clusters, FUN = function(cluster) {
 })
 names(deg_results_fl) <- clusters
 
-sub_setter_pos <- function(df) {
+sub_setter <- function(df) {
   df_sub <- df[!is.na(df$p_val_adj), ]
   df_sub <- df_sub[
-    df_sub$avg_log2FC > fc_threshold,
-  ]
-  return(df_sub)
-}
-sub_setter_neg <- function(df) {
-  df_sub <- df[!is.na(df$p_val_adj), ]
-  df_sub <- df_sub[
-    df_sub$avg_log2FC > fc_threshold,
+    df_sub$avg_log2FC > fc_threshold & df_sub$p_val_adj < padj_threshold,
   ]
   return(df_sub)
 }
 
 write_sub_setter <- function(cluster) {
-  write.table(sub_setter_pos(deg_results_fl[[cluster]]),
+  write.table(sub_setter(deg_results_fl[[cluster]]),
     file = named_sub_setter_pos_files[[cluster]],
     sep = ","
   )
-  write.table(sub_setter_neg(deg_results_bm[[cluster]]),
+  write.table(sub_setter(deg_results_bm[[cluster]]),
     file = named_sub_setter_neg_files[[cluster]],
     sep = ","
   )
@@ -84,24 +78,24 @@ for (cluster in clusters) {
 prim_pos <- intersect(
   intersect(
     intersect(
-      rownames(sub_setter_pos(deg_results_fl[["HSC"]])),
-      rownames(sub_setter_pos(deg_results_fl[["MPP.I"]]))
+      rownames(sub_setter(deg_results_fl[["HSC"]])),
+      rownames(sub_setter(deg_results_fl[["MPP.I"]]))
     ),
-    rownames(sub_setter_pos(deg_results_fl[["MPP.II"]]))
-  ), rownames(sub_setter_pos(deg_results_fl[["Cyc"]]))
+    rownames(sub_setter(deg_results_fl[["MPP.II"]]))
+  ), rownames(sub_setter(deg_results_fl[["Cyc"]]))
 )
 
 lymph_pos <- intersect(
-  rownames(sub_setter_pos(deg_results_fl[["Ly.I"]])),
-  rownames(sub_setter_pos(deg_results_fl[["Ly.II"]]))
+  rownames(sub_setter(deg_results_fl[["Ly.I"]])),
+  rownames(sub_setter(deg_results_fl[["Ly.II"]]))
 )
 
 mye_pos <- intersect(
   intersect(
-    rownames(sub_setter_pos(deg_results_fl[["DC.Mono"]])),
-    rownames(sub_setter_pos(deg_results_fl[["GMP"]]))
+    rownames(sub_setter(deg_results_fl[["DC.Mono"]])),
+    rownames(sub_setter(deg_results_fl[["GMP"]]))
   ),
-  rownames(sub_setter_pos(deg_results_fl[["MEP"]]))
+  rownames(sub_setter(deg_results_fl[["MEP"]]))
 )
 
 all_core_pos <- unique(c(prim_pos, lymph_pos, mye_pos))
@@ -111,24 +105,24 @@ print(lapply(list(prim_pos, lymph_pos, mye_pos), length))
 prim_neg <- intersect(
   intersect(
     intersect(
-      rownames(sub_setter_neg(deg_results_bm[["HSC"]])),
-      rownames(sub_setter_neg(deg_results_bm[["MPP.I"]]))
+      rownames(sub_setter(deg_results_bm[["HSC"]])),
+      rownames(sub_setter(deg_results_bm[["MPP.I"]]))
     ),
-    rownames(sub_setter_neg(deg_results_bm[["MPP.II"]]))
+    rownames(sub_setter(deg_results_bm[["MPP.II"]]))
   ),
-  rownames(sub_setter_neg(deg_results_bm[["Cyc"]]))
+  rownames(sub_setter(deg_results_bm[["Cyc"]]))
 )
 
 lymph_neg <- intersect(
-  rownames(sub_setter_neg(deg_results_bm[["Ly.I"]])),
-  rownames(sub_setter_neg(deg_results_bm[["Ly.II"]]))
+  rownames(sub_setter(deg_results_bm[["Ly.I"]])),
+  rownames(sub_setter(deg_results_bm[["Ly.II"]]))
 )
 mye_neg <- intersect(
   intersect(
-    rownames(sub_setter_neg(deg_results_bm[["DC.Mono"]])),
-    rownames(sub_setter_neg(deg_results_bm[["GMP"]]))
+    rownames(sub_setter(deg_results_bm[["DC.Mono"]])),
+    rownames(sub_setter(deg_results_bm[["GMP"]]))
   ),
-  rownames(sub_setter_neg(deg_results_bm[["MEP"]]))
+  rownames(sub_setter(deg_results_bm[["MEP"]]))
 )
 
 all_core_neg <- unique(c(prim_neg, lymph_neg, mye_neg))
