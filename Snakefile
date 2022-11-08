@@ -533,6 +533,37 @@ rule rev_fetal_core_box_plots:
         "src/DESeq2/6.2_rev_fetal_core_boxplots_final.R"
 
 
+rule runx_pca_plots:
+    input:
+        adult_signature=rules.produce_sc_fl_core.output.adult_signature,
+        fetal_signature=rules.produce_sc_fl_core.output.fetal_signature,
+        samples=config["external_dir"] + "iPS_ETVRUNX/dev_cell_samples.txt",
+        fpkm=config["external_dir"] + "iPS_ETVRUNX/fpkm.tsv",
+    output:
+        plot_top500=DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500.pdf",
+        plot_subset500=DESEQ2_PLOT_DIR
+        + "FLcoreSC_PCA_pseudorep_core_rem_after_top500.pdf",
+        plot_core=DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudoreps_core.pdf",
+        overlapping_genes=DESEQ2_DIR
+        + "FLcoreSC/overlapping_genes_pseudoreps_core.csv",
+        plots_random=expand(
+            DESEQ2_PLOT_DIR
+            + "{fl_core_version}_random_PCA_genes_pseudoreps_core_{i}.pdf",
+            fl_core_version="FLcoreSC",
+            i=list(range(1, 6)),
+        ),
+        csvs_random=expand(
+            DESEQ2_DIR
+            + "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
+            fl_core_version="FLcoreSC",
+            i=list(range(1, 6)),
+        ),
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/5.3_runx1_pca.R"
+
+
 rule runx_pca_plots_sc:
     input:
         adult_signature=rules.produce_sc_fl_core.output.adult_signature,
@@ -540,24 +571,25 @@ rule runx_pca_plots_sc:
         samples=config["external_dir"] + "iPS_ETVRUNX/dev_cell_samples.txt",
         fpkm=config["external_dir"] + "iPS_ETVRUNX/fpkm.tsv",
     output:
-        plot_top500=DESEQ2_PLOT_DIR + "FLcoreSC/PCA_top500.pdf",
-        plot_subset500=DESEQ2_PLOT_DIR + "FLcoreSC/PCA_pseudorep_core_rem_after_top500.pdf",
-        plot_core=DESEQ2_PLOT_DIR + "FLcoreSC/PCA_pseudoreps_core.pdf",
-        overlapping_genes=DESEQ2_DIR +
-        "FLcoreSC/overlapping_genes_pseudoreps_core.csv",
+        plot_top500=DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500.pdf",
+        plot_subset500=DESEQ2_PLOT_DIR
+        + "FLcoreSC_PCA_pseudorep_core_rem_after_top500.pdf",
+        plot_core=DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudoreps_core.pdf",
+        overlapping_genes=DESEQ2_DIR
+        + "FLcoreSC/overlapping_genes_pseudoreps_core.csv",
         plots_random=expand(
-            DESEQ2_PLOT_DIR +
-            "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.pdf",
+            DESEQ2_PLOT_DIR
+            + "{fl_core_version}_random_PCA_genes_pseudoreps_core_{i}.pdf",
             fl_core_version="FLcoreSC",
-            i=list(range(1, 6))
+            i=list(range(1, 6)),
         ),
         csvs_random=expand(
-            DESEQ2_DIR +
-            "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
+            DESEQ2_DIR
+            + "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
             fl_core_version="FLcoreSC",
-            i=list(range(1, 6))
+            i=list(range(1, 6)),
         ),
     conda:
         "envs/DESeq2.yaml"
     script:
-        "src/DESeq2/5.2_runx1_pca.R"
+        "src/DESeq2/5.2_runx1_pca_sc.R"
