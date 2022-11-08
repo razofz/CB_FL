@@ -7,21 +7,23 @@ import shutil
 
 DESEQ2_DIR = config["processed_dir"] + "DESeq2/results/"
 DESEQ2_PLOT_DIR = config["processed_dir"] + "DESeq2/images/"
-NOTEBOOKS_PLOT_DIR = config["processed_dir"] + "/notebooks/Figures/"
+NOTEBOOKS_PLOT_DIR = config["processed_dir"] + "notebooks/Figures/"
 GLOBAL_FIGURES_DIR = "figures/figures/"
 
 figures = json.load(open("figures/figures.json", "r"))
 
 ins = []
 outs = []
+ins_dict = {}
+outs_dict = {}
 for figure in list(figures.keys()):
-    if figures[figure]["origin"] not in ["py", "DEseq"]:
+    if figures[figure]["origin"] not in ["py", "DESeq"]:
         ...
     else:
         if figures[figure]["origin"] == "py":
             path = NOTEBOOKS_PLOT_DIR
             ft = ".svg"
-        elif figures[figure]["origin"] == "DEseq":
+        elif figures[figure]["origin"] == "DESeq":
             path = DESEQ2_PLOT_DIR
             ft = ".pdf"
         i = 1
@@ -34,6 +36,8 @@ for figure in list(figures.keys()):
             outfile = GLOBAL_FIGURES_DIR + idx + "_" + fn + ft
             ins.append(infile)
             outs.append(outfile)
+            ins_dict[idx] = infile
+            outs_dict[idx] = outfile
             i += 1
 
 
@@ -86,7 +90,7 @@ rule all:
             iters=config["random_params"]["iterations"],
         ),
         DESEQ2_DIR + "Pvals_anova_FL_up2.csv",
-        DESEQ2_PLOT_DIR + "FLcoreSC/PCA_top500.pdf",
+        DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500.pdf",
         outs,
 
 

@@ -12,7 +12,7 @@
 		]
 	},
 	"Figure1d": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC12_singel_cell_clusters_top500",
 			"PC23_singel_cell_clusters_top500"
@@ -32,13 +32,13 @@
 		]
 	},
 	"Figure2d": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC12_singel_cell_gates_top500"
 		]
 	},
 	"Figure2e": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC12_singel_cell_clusters_gates_top500"
 		]
@@ -103,40 +103,40 @@
 		]
 	},
 	"Figure5a": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"Main_Figure_5a"
 		]
 	},
 	"Figure5b": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"fetalcore_samePC1_all",
 			"random_samePC1_all_1"
 		]
 	},
 	"Figure5c": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC1_variance_test_all_leuk_in_PCA_its_10000"
 		]
 	},
 	"Figure5d": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"IndividualPC1_fetalcore_KMT2A-AFF1",
 			"random_PC1_KMT2A-AFF1_1"
 		]
 	},
 	"Figure5e": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"Fetal_core_up_box_plot_KMT2A-AFF1",
 			"Fetal_core_down_box_plot_KMT2A-AFF1"
 		]
 	},
 	"Figure5f": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"heatmap_B_fetal_sig_ALL_AF4"
 		]
@@ -180,13 +180,13 @@
 		]
 	},
 	"Sup_Figure2d": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC23_singel_cell_gates_top500"
 		]
 	},
 	"Sup_Figure2e": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC23_singel_cell_clusters_gates_top500"
 		]
@@ -198,7 +198,7 @@
 		]
 	},
 	"Sup_Figure3b": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC23_FL_BM_singel_cell_gates_top500",
 			"PC12_FL_BM_singel_cell_gates_top500"
@@ -267,50 +267,58 @@
 		]
 	},
 	"Sup_Figure5a": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC12_FL_BM_singel_cell_clusters_top500"
 		]
 	},
 	"Sup_Figure5b": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC23_FL_BM_singel_cell_clusters_top500"
 		]
 	},
 	"Sup_Figure5c": {
-		"origin": "py",
-		"filenames": [
-			"DEseq_Cyc_FL_yBM",
-			"DEseq_DC.Mono_FL_yBM",
-			"DEseq_GMP_FL_yBM",
-			"DEseq_HSC_FL_yBM",
-			"DEseq_Ly.II_FL_yBM",
-			"DEseq_Ly.I_FL_yBM",
-			"DEseq_MEP_FL_yBM",
-			"DEseq_MPP.II_FL_yBM",
-			"DEseq_MPP.I_FL_yBM"
-		]
-	},
-	"Sup_Figure5d": {
 		"origin": "venn",
 		"filenames": []
 	},
+	"Sup_Figure5d": {
+		"origin": "coming",
+		"filenames": []
+	},
+	"Sup_Figure5e": {
+		"origin": "venn",
+		"filenames": []
+	},
+	"Sup_Figure5f": {
+		"origin": "coming",
+		"filenames": []
+	},
+	"Sup_Figure5g": {
+		"origin": "venn",
+		"filenames": []
+	},
+	"Sup_Figure5h": {
+		"origin": "DESeq",
+		"filenames": [
+			"FLcoreSC_PCA_pseudoreps_core"
+		]
+	},
 	"Sup_Figure6a": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC12_top500_preBatch_ALL_leuk",
 			"PC12_top500_postBatch_ALL_leuk"
 		]
 	},
 	"Sup_Figure6b": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"IndividualPC1_PC2_fetalcore_MLLAF4"
 		]
 	},
 	"Sup_Figure6c": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"IndividualPC1_fetalcore_KMT2A-MLLT1",
 			"IndividualPC1_fetalcore_BCR-ABL1",
@@ -329,7 +337,7 @@
 		]
 	},
 	"Sup_Figure6d": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"PC1_variance_test_BCR-ABL1_its_10000",
 			"PC1_variance_test_ETV6-RUNX1_its_10000",
@@ -339,7 +347,7 @@
 		]
 	},
 	"Sup_Figure6e": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"Fetal_core_up_box_plot_BCR-ABL1",
 			"Fetal_core_up_box_plot_High hyperdiploid",
@@ -348,7 +356,7 @@
 		]
 	},
 	"Sup_Figure6f": {
-		"origin": "DEseq",
+		"origin": "DESeq",
 		"filenames": [
 			"heatmap_Hox_genes_AF4"
 		]
