@@ -1,7 +1,6 @@
 invisible(lapply(list(
   "stringr",
   "ggplot2",
-  "stringr",
   "DESeq2"
 ), FUN = function(x) {
   suppressPackageStartupMessages(library(x, character.only = T))
@@ -116,12 +115,22 @@ pca_3table <- data.frame(
   sample_table
 )
 
+if (snakemake@wildcards[["fl_core_version"]] == "FLcorePseudotech") {
+  pca_3table <- data.frame(
+    PC1 = -pca_3$x[, 1], PC2 = -pca_3$x[, 2], PC3 = pca_3$x[, 3],
+    sample_table
+  )
+} else {
+  pca_3table <- data.frame(
+    PC1 = pca_3$x[, 1], PC2 = pca_3$x[, 2], PC3 = pca_3$x[, 3],
+    sample_table
+  )
+}
+
 overlapping_genes <- genes_in_pca[
   genes_in_pca %in% rownames(pca_3$rotation)
 ]
 write.csv(overlapping_genes, snakemake@output[["overlapping_genes"]])
-
-
 
 min_x <- min(unlist(lapply(list(pca_1table, pca_2table, pca_3table),
   FUN = function(x) min(x["PC1"])
@@ -139,7 +148,6 @@ width_x <- max_x - min_x
 width_y <- max_y - min_y
 margin_x <- width_x * .05
 margin_y <- width_y * .05
-
 
 p1 <- ggplot(
   data = pca_1table,
@@ -184,7 +192,6 @@ p3 <- ggplot(
 ggsave(snakemake@output[["plot_top500"]], plot = p1)
 ggsave(snakemake@output[["plot_subset500"]], plot = p2)
 ggsave(snakemake@output[["plot_core"]], plot = p3)
-
 
 #random genes PCA
 n_genes <- length(rownames(pca_3$rotation))
