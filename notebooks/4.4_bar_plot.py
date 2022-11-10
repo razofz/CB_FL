@@ -43,64 +43,46 @@ def clean_axis(ax, ts=11, ga=0.6):
 fl_utils.set_project_path()
 
 # + tags=[]
+in_dir = "data/processed/DESeq2/results/sub_setter/FLcorePseudotech/"
 out_dir = "data/processed/notebooks"
 figures_dir = out_dir + "/Figures"
 
-in_files = {}
+fl_clusters = [
+    "Cyc",
+    "DC.Mono",
+    "GMP",
+    "HSC",
+    "Ly.I",
+    "Ly.II",
+    "MEP",
+    "MPP.I",
+    "MPP.II",
+]
+
+in_files = {
+    "csvs": {
+        cl: {"pos": in_dir + cl + "_pos" + ".csv", "neg": in_dir + cl + "_neg" + ".csv"}
+        for cl in fl_clusters
+    }
+}
 
 out_files = {
     "plot_bar_n_diff_genes_all_clust_up_dn": figures_dir
     + "/bar_n_diff_genes_all_clust_up_dn.svg",
 }
 
+fl_utils.print_files(in_files, "in")
 fl_utils.print_files(out_files, "out")
 
-# + tags=[]
-numbers = """547 Cyc_neg
-436 Cyc_pos
-758 DC.Mono_neg
-395 DC.Mono_pos
-1157 GMP_neg
-581 GMP_pos
-1306 HSC_neg
-973 HSC_pos
-502 Ly.II_neg
-358 Ly.II_pos
-1001 Ly.I_neg
-616 Ly.I_pos
-1190 MEP_neg
-606 MEP_pos
-1130 MPP.II_neg
-739 MPP.II_pos
-1205 MPP.I_neg
-941 MPP.I_pos"""
+sizes = {cl: {"pos": 0, "neg": 0} for cl in fl_clusters}
+for cl in fl_clusters:
+    for reg in ["pos", "neg"]:
+        with open(in_files["csvs"][cl][reg], "r") as f:
+            sizes[cl][reg] = len(f.readlines()) - 1
 
-# + tags=[]
-tmp = [x.split(" ") for x in numbers.split("\n")]
-values = {x[1]: int(x[0]) - 1 for x in tmp}
-
-tot = []
-up = []
-dn = []
-cluster_names = []
-for i in range(0, len(values.keys()), 2):
-    # print(i)
-    cluster_name = list(values.keys())[i].split("_")[0]
-    print(cluster_name)
-    cluster_names.append(cluster_name)
-    # print(list(values.items())[i:i+2])
-    cluster_counts = list(values.values())[i: i + 2]
-    print(f"{cluster_counts=}")
-    dn.append(cluster_counts[0])
-    up.append(cluster_counts[1])
-    tot.append(sum(cluster_counts))
-
-print(dn, up, tot)
-
-# + tags=[]
-n_diff = pd.DataFrame(
-    data={"tot": tot, "up": up, "dn": dn}, index=cluster_names
-)
+n_diff = pd.DataFrame(sizes).T
+n_diff["tot"] = n_diff.pos + n_diff.neg
+n_diff.rename(columns={"neg": "dn", "pos": "up"}, inplace=True)
 n_diff
 
 # + tags=[]
@@ -124,6 +106,5 @@ labels = ["up", "down"]
 plt.legend(handles, labels, loc="upper right")
 clean_axis(ax)
 plt.savefig(out_files["plot_bar_n_diff_genes_all_clust_up_dn"], dpi=300)
-# plt.savefig(out_dir + "raz_plot_bar_n_diff_genes_all_clust_up_dn.svg", dpi=300)
 plt.tight_layout()
 plt.show()
