@@ -4,7 +4,7 @@ interim_dir: "data/interim/"
 processed_dir: "data/processed/"
 raw_dir: "data/raw/"
 fl_cores: [
-  "FLcoreNoPseudotech",
+  "FLcoreNoPseudorep",
   "FLcoreSC",
   "FLcorePseudotech"
 ]

@@ -37,12 +37,14 @@ out_dir = "data/processed/notebooks"
 zarr_dir = out_dir + "/zarr_files"
 sup_tables_raw_dir = raw_dir + "/paper_specific/Supplemental_tables"
 figures_dir = out_dir + "/Figures"
+core_dir = "data/processed/DESeq2/results/FLcorePseudotech/"
 
 # + tags=[]
 in_files = {
     "zarr_FL": zarr_dir + "/RNA_FL_hpc_merged",
     "zarr_merged": zarr_dir + "/RNA_yBM_and_FL_hpc_merged",
-    "fetal_signature": sup_tables_raw_dir + "/Fetal_signature_p005.txt",
+    "fetal_signature": core_dir + "/Fetal_signature_p005.txt",
+    # "fetal_signature": sup_tables_raw_dir + "/Fetal_signature_p005.txt",
 }
 
 out_files = {

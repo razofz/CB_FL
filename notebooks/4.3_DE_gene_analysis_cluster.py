@@ -346,8 +346,20 @@ for i in n_diff_up.keys():
         print(x)
 
 # +
+all_diff_gene_up = pd.DataFrame.from_dict(n_diff_up, orient="index")
+all_diff_gene_up = all_diff_gene_up.T
+
+# all_diff_gene_up.to_csv(out_files["diff_genes_up"], index=False)
+# all_diff_gene_up.to_csv(f"{sup_tables_dir}/all_diff_genes_up.csv", index=False)
+# all_diff_gene_up.to_csv('./Supplemental_tables/all_diff_genes_up.csv',index=False)
 
 # +
+all_diff_gene_dn = pd.DataFrame.from_dict(n_diff_dn, orient="index")
+all_diff_gene_dn = all_diff_gene_dn.T
+
+# all_diff_gene_dn.to_csv(out_files["diff_genes_dn"], index=False)
+# all_diff_gene_dn.to_csv(f"{sup_tables_dir}/all_diff_genes_dn.csv", index=False)
+# all_diff_gene_dn.to_csv('./Supplemental_tables/all_diff_genes_dn.csv',index=False)
 
 # + tags=[]
 for i in n_diff.columns:

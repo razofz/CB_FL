@@ -283,16 +283,22 @@
 		"filenames": []
 	},
 	"Sup_Figure5d": {
-		"origin": "coming",
-		"filenames": []
+		"origin": "DESeq",
+		"filenames": [
+			"FLcorePseudotech_PCA_pseudoreps_core",
+			"FLcorePseudotech_PCA_top500",
+			"FLcorePseudotech_PCA_pseudorep_core_rem_after_top500"
+		]
 	},
 	"Sup_Figure5e": {
 		"origin": "venn",
 		"filenames": []
 	},
 	"Sup_Figure5f": {
-		"origin": "coming",
-		"filenames": []
+		"origin": "DESeq",
+		"filenames": [
+			"FLcoreNoPseudorep_PCA_pseudoreps_core"
+		]
 	},
 	"Sup_Figure5g": {
 		"origin": "venn",

@@ -7,6 +7,7 @@ import shutil
 
 DESEQ2_DIR = config["processed_dir"] + "DESeq2/results/"
 DESEQ2_PLOT_DIR = config["processed_dir"] + "DESeq2/images/"
+NOTEBOOKS_DIR = config["processed_dir"] + "notebooks/"
 NOTEBOOKS_PLOT_DIR = config["processed_dir"] + "notebooks/Figures/"
 GLOBAL_FIGURES_DIR = "figures/figures/"
 
@@ -58,12 +59,12 @@ rule all:
             DESEQ2_DIR
             + "Normed_counts/{fl_core_version}/gated_{gate}_DESeq_normed.txt",
             gate=config["gates_to_use"],
-            fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+            fl_core_version="FLcorePseudotech",
         ),
         expand(
             DESEQ2_DIR + "{fl_core_version}/gated_{gate}_FL_yBM.csv",
             gate=config["gates_to_use"],
-            fl_core_version=[v for v in config["fl_cores"] if "eudo" in v],
+            fl_core_version="FLcorePseudotech",
         ),
         expand(
             DESEQ2_DIR + "{fl_core_version}/Fetal_signature_p005.txt",
@@ -92,6 +93,33 @@ rule all:
         DESEQ2_DIR + "Pvals_anova_FL_up2.csv",
         DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500.pdf",
         outs,
+        expand(
+            DESEQ2_PLOT_DIR + "{fl_core_version}_PCA_top500.pdf",
+            fl_core_version=config["fl_cores"],
+        ),
+        expand(
+            DESEQ2_PLOT_DIR
+            + "{fl_core_version}_PCA_pseudorep_core_rem_after_top500.pdf",
+            fl_core_version=config["fl_cores"],
+        ),
+        expand(
+            DESEQ2_PLOT_DIR + "{fl_core_version}_PCA_pseudoreps_core.pdf",
+            overlapping_genes=DESEQ2_DIR
+            + "{fl_core_version}/overlapping_genes_pseudoreps_core.csv",
+            fl_core_version=config["fl_cores"],
+        ),
+        expand(
+            DESEQ2_PLOT_DIR
+            + "{fl_core_version}_random_PCA_genes_pseudoreps_core_{i}.pdf",
+            i=list(range(1, 6)),
+            fl_core_version=config["fl_cores"],
+        ),
+        expand(
+            DESEQ2_DIR
+            + "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
+            i=list(range(1, 6)),
+            fl_core_version=config["fl_cores"],
+        ),
 
 
 rule gather_figures:
@@ -105,7 +133,7 @@ rule gather_figures:
             for k, v in outs_dict.items():
                 if out_file in v:
                     key_use = k
-                    print(key_use)
+                    # print(key_use)
             source = ins_dict[key_use]
             destination = outs_dict[key_use]
             assert source.split("/")[-1] in destination
@@ -143,23 +171,53 @@ rule deseq_all_clustered_pops:
             + "Normed_counts/{fl_core_version}/only_FL_DESeq_normed.txt",
             allow_missing=True,
         ),
-        gsea_fc_rnk=expand(
-            DESEQ2_DIR + "{fl_core_version}/{cluster}_FL_yBM.rnk",
-            cluster=config["fl_clusters_to_use"],
-            allow_missing=True,
-        ),
-        mpp1_hsc_rnk=expand(
-            DESEQ2_DIR + "{fl_core_version}/FL_MPPI_HSC.rnk",
-            allow_missing=True,
-        ),
-        mpp1_mpp2_rnk=expand(
-            DESEQ2_DIR + "{fl_core_version}/FL_MPPI_MPPII.rnk",
-            allow_missing=True,
-        ),
+        # gsea_fc_rnk=expand(
+        #     DESEQ2_DIR + "{fl_core_version}/{cluster}_FL_yBM.rnk",
+        #     cluster=config["fl_clusters_to_use"],
+        #     allow_missing=True,
+        # ),
+        # mpp1_hsc_rnk=expand(
+        #     DESEQ2_DIR + "{fl_core_version}/FL_MPPI_HSC.rnk",
+        #     allow_missing=True,
+        # ),
+        # mpp1_mpp2_rnk=expand(
+        #     DESEQ2_DIR + "{fl_core_version}/FL_MPPI_MPPII.rnk",
+        #     allow_missing=True,
+        # ),
     conda:
         "envs/DESeq2.yaml"
     script:
         "src/DESeq2/1.1_All_clustered_pops.R"
+
+
+rule deseq_all_clustered_pops_no_pseudorep:
+    input:
+        cts_files=expand(
+            NOTEBOOKS_DIR
+            + "DEseq2/FLcoreNoPseudorep/cluster_wise/"
+            + "{cluster}_cts_all_hpc.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+        coldata_files=expand(
+            NOTEBOOKS_DIR
+            + "DEseq2/FLcoreNoPseudorep/cluster_wise/"
+            + "{cluster}_coldata_all_hpc.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+    output:
+        normed_counts=expand(
+            DESEQ2_DIR
+            + "Normed_counts/FLcoreNoPseudorep/{cluster}_DESeq_normed.txt",
+            cluster=config["fl_clusters_to_use"],
+        ),
+        deseq_results=expand(
+            DESEQ2_DIR + "FLcoreNoPseudorep/{cluster}_FL_yBM.csv",
+            cluster=config["fl_clusters_to_use"],
+        ),
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/1.1b_All_clustered_pops_FLcoreNoPseudorep.R"
 
 
 rule deseq_all_gated_pops:
@@ -179,14 +237,12 @@ rule deseq_all_gated_pops:
     output:
         normed_counts=expand(
             DESEQ2_DIR
-            + "Normed_counts/{fl_core_version}/gated_{gate}_DESeq_normed.txt",
+            + "Normed_counts/FLcorePseudotech/gated_{gate}_DESeq_normed.txt",
             gate=config["gates_to_use"],
-            allow_missing=True,
         ),
         deseq_results=expand(
-            DESEQ2_DIR + "{fl_core_version}/gated_{gate}_FL_yBM.csv",
+            DESEQ2_DIR + "FLcorePseudotech/gated_{gate}_FL_yBM.csv",
             gate=config["gates_to_use"],
-            allow_missing=True,
         ),
     conda:
         "envs/DESeq2.yaml"
@@ -539,28 +595,40 @@ rule rev_fetal_core_box_plots:
 
 rule runx_pca_plots:
     input:
-        adult_signature=rules.produce_sc_fl_core.output.adult_signature,
-        fetal_signature=rules.produce_sc_fl_core.output.fetal_signature,
+        adult_signature=rules.deseq_produce_fl_core.output.adult_signature,
+        fetal_signature=rules.deseq_produce_fl_core.output.fetal_signature,
         samples=config["external_dir"] + "iPS_ETVRUNX/dev_cell_samples.txt",
         fpkm=config["external_dir"] + "iPS_ETVRUNX/fpkm.tsv",
     output:
-        plot_top500=DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500.pdf",
-        plot_subset500=DESEQ2_PLOT_DIR
-        + "FLcoreSC_PCA_pseudorep_core_rem_after_top500.pdf",
-        plot_core=DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudoreps_core.pdf",
-        overlapping_genes=DESEQ2_DIR
-        + "FLcoreSC/overlapping_genes_pseudoreps_core.csv",
+        plot_top500=expand(
+            DESEQ2_PLOT_DIR + "{fl_core_version}_PCA_top500.pdf",
+            allow_missing=True,
+        ),
+        plot_subset500=expand(
+            DESEQ2_PLOT_DIR
+            + "{fl_core_version}_PCA_pseudorep_core_rem_after_top500.pdf",
+            allow_missing=True,
+        ),
+        plot_core=expand(
+            DESEQ2_PLOT_DIR + "{fl_core_version}_PCA_pseudoreps_core.pdf",
+            allow_missing=True,
+        ),
+        overlapping_genes=expand(
+            DESEQ2_DIR
+            + "{fl_core_version}/overlapping_genes_pseudoreps_core.csv",
+            allow_missing=True,
+        ),
         plots_random=expand(
             DESEQ2_PLOT_DIR
             + "{fl_core_version}_random_PCA_genes_pseudoreps_core_{i}.pdf",
-            fl_core_version="FLcoreSC",
             i=list(range(1, 6)),
+            allow_missing=True,
         ),
         csvs_random=expand(
             DESEQ2_DIR
             + "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
-            fl_core_version="FLcoreSC",
             i=list(range(1, 6)),
+            allow_missing=True,
         ),
     conda:
         "envs/DESeq2.yaml"

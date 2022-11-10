@@ -174,7 +174,7 @@ for (leuk in unique(vsd$type)) {
   )
   abline(v = percent_var_fl_core[1], col = "red", lwd = 3, lty = 2)
   text(
-    x = percent_var_fl_core[1] + 0.008, y = 300,
+    x = percent_var_fl_core[1] + 0.008, y = 225,
     labels = paste0("p-val: ", pval)
   )
   dev.off()
@@ -182,11 +182,20 @@ for (leuk in unique(vsd$type)) {
 
 # compare with all leuk subtype in same PCA
 
+# Initializes the progress bar
+pb <- txtProgressBar(
+  min = 1,
+  max = iter,
+  style = 3,
+  char = "="
+)
+
 pca <- prcomp(t(assay(vsd)[select_fl_core, ])) # calculate PCA
 percent_var_fl_core <- pca$sdev^2 / sum(pca$sdev^2) # calc PCA contribution
 comp1 <- NULL
 for (rounds in 1:iter) {
-  print(rounds)
+  # print(rounds)
+  setTxtProgressBar(pb, rounds)
   # genes_use <- norm_counts_use[sample(
   #   nrow(norm_counts_use), n_genes,
   #   replace = FALSE
@@ -197,6 +206,8 @@ for (rounds in 1:iter) {
 
   comp1 <- c(comp1, percent_var[1])
 }
+close(pb)
+
 pval <- length(which(comp1 >= percent_var_fl_core[1])) / iter
 high_x <- max(c(comp1, percent_var_fl_core[1])) + 0.02
 low_x <- min(c(comp1, percent_var_fl_core[1])) - 0.02

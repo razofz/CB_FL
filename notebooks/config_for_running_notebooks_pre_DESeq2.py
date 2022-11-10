@@ -16,6 +16,7 @@ c.NbConvertApp.notebooks = [
     "3.4_vizualizing_mapping_on_BM.ipynb",
     "4.1_gene_enrichment_in_clusters.ipynb",
     "4.2_DE_FL_yBM_on_FL.ipynb",
+    "4.2b_DE_FL_yBM_on_FL_no_pseudorep.ipynb",
     "4.3_DE_gene_analysis_cluster.ipynb",
     "4.4_bar_plot.ipynb",
     "5.1_make_adt_fcs.ipynb",
