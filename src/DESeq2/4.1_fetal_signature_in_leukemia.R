@@ -30,7 +30,7 @@ goi <- data.frame(
 
 sample_table <- read.table(
   snakemake@input[["ball_tsv"]],
-  header = TRUE, dec = ",", sep = "\t"
+  header = TRUE, dec = ",", sep = "\t", quote = '""'
 )
 colums_oi <- c(
   "patient", "fusion", "age", "gender", "primary.subtype",

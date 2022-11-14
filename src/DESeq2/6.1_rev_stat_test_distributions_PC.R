@@ -32,7 +32,7 @@ named_plots_filenames <- make_named_version(
 )
 
 sample_table <- read.table(snakemake@input[["ball_tsv"]],
-  header = TRUE, dec = ",", sep = "\t"
+  header = TRUE, dec = ",", sep = "\t", quote = '""'
 )
 
 

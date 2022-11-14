@@ -60,7 +60,7 @@ named_plots_type_gender <- make_named_version(
 print(named_plots_type_gender)
 
 sample_table <- read.table(snakemake@input[["ball_tsv"]],
-  header = TRUE, dec = ",", sep = "\t"
+  header = TRUE, dec = ",", sep = "\t", quote = '""'
 )
 colums_oi <- c(
   "patient", "fusion", "age", "gender", "primary.subtype",
