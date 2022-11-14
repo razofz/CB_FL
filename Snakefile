@@ -171,19 +171,6 @@ rule deseq_all_clustered_pops:
             + "Normed_counts/{fl_core_version}/only_FL_DESeq_normed.txt",
             allow_missing=True,
         ),
-        # gsea_fc_rnk=expand(
-        #     DESEQ2_DIR + "{fl_core_version}/{cluster}_FL_yBM.rnk",
-        #     cluster=config["fl_clusters_to_use"],
-        #     allow_missing=True,
-        # ),
-        # mpp1_hsc_rnk=expand(
-        #     DESEQ2_DIR + "{fl_core_version}/FL_MPPI_HSC.rnk",
-        #     allow_missing=True,
-        # ),
-        # mpp1_mpp2_rnk=expand(
-        #     DESEQ2_DIR + "{fl_core_version}/FL_MPPI_MPPII.rnk",
-        #     allow_missing=True,
-        # ),
     conda:
         "envs/DESeq2.yaml"
     script:
