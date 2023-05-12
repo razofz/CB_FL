@@ -8,7 +8,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.13.1
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: notebooks_FL
 #     language: python
 #     name: python3
 # ---
@@ -89,6 +89,8 @@ for i in x:
     color_palette_FL[i] = x[i][x[i] > 0].index[0]
 # -
 
+color_palette_BM
+
 for sample in ["FL_CS16", "FL_HPC", "FL_W9", "CB_HPC"]:
     print(sample)
     for g, ms in ds_yBM.get_mapping_score(
@@ -125,6 +127,9 @@ for i in sorted(set(FL_clusts)):
         threshold_fraction=0.4,
         target_subset=list(np.where(FL_clusts == i)[0]),
     )
+
+color_palette_BM["MEP-II"] = "#cc4a4a"
+color_palette_BM["MPP-II"] = "#ffc4c4"
 
 # +
 clust_order = [
