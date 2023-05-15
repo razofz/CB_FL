@@ -652,3 +652,44 @@ rule runx_pca_plots_sc:
         "envs/DESeq2.yaml"
     script:
         "src/DESeq2/5.2_runx1_pca_sc.R"
+
+
+rule plot_ips_zscore:
+    input:
+        deg=DESEQ2_DIR + "FLcorePseudotech/DE_genes.csv",
+        samples=config["external_dir"] + "iPS_ETVRUNX/dev_cell_samples.txt",
+        fpkm=config["external_dir"] + "iPS_ETVRUNX/fpkm.tsv",
+    output:
+        plot=DESEQ2_PLOT_DIR + "FLcore_zscore_boxplot.pdf",
+    conda:
+        "envs/DESeq2.yaml"
+    script:
+        "src/DESeq2/7.1_ips_zscore.R"
+
+
+rule lognorm_analysis:
+    input:
+        adult_signature=DESEQ2_DIR + "FLcorePseudotech/Adult_signature_p005.txt",
+        fetal_signature=DESEQ2_DIR + "FLcorePseudotech/Fetal_signature_p005.txt",
+        roy_rds=config["raw_dir"] + "paper_specific/Roy/roy.rds",
+        roy_metadata=config["raw_dir"] + "paper_specific/Roy/roy_scarf_metadata.csv",
+    output:
+        plot_fl=DESEQ2_PLOT_DIR + "lognorm_vln_FL_score.pdf",
+        plot_ad=DESEQ2_PLOT_DIR + "lognorm_vln_ABM_score.pdf",
+        scores=DESEQ2_DIR + "roy_all_modulescores.csv",
+    conda:
+        "envs/seurat.yaml"
+    script:
+        "src/DESeq2/7.2_lognorm_analysis_newplots.R"
+
+
+rule wilcox:
+    input:
+        scores=DESEQ2_DIR + "roy_all_modulescores.csv",
+    output:
+        pvals_fl=DESEQ2_DIR + "wilcox_bonferroni_FL_pvals.csv",
+        pvals_ad=DESEQ2_DIR + "wilcox_bonferroni_ABM_pvals.csv",
+    conda:
+        "envs/seurat.yaml"
+    script:
+        "src/DESeq2/7.3_wilcox.R"
