@@ -8,7 +8,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.13.1
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: notebooks_FL
 #     language: python
 #     name: python3
 # ---
@@ -294,6 +294,12 @@ df = df.drop(index="nan")
 df = df / df.sum() * 100
 
 # +
+
+color_palette_BM_slight_change = color_palette_BM
+color_palette_BM_slight_change["MEP-II"] = "#cc4a4a"
+color_palette_BM_slight_change["MPP-II"] = "#ffc4c4"
+
+# +
 clust_order = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 fig, ax = plt.subplots(1, 1, figsize=(10, 4))
 
@@ -301,7 +307,7 @@ for x in clust_order:
     df_sub = df[x]
     df_sub = df_sub.sort_values().cumsum()[::-1]
     for k, v in df_sub.to_dict().items():
-        color = color_palette_BM[k] if k != "NA" else "#000000"
+        color = color_palette_BM_slight_change[k] if k != "NA" else "#000000"
         ax.bar([x], [v], color=color, lw=1, edgecolor="k")
 ax.set_xticks(range(len(clust_order)))
 ax.set_xticklabels([x for x in clust_order])
