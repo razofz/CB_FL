@@ -93,19 +93,26 @@
 	"Figure4e": {
 		"origin": "py",
 		"filenames": [
-			"hox_heatmap"
+			"heatmap_yBM_FL_fetal_core_no_BM_Gene"
 		]
 	},
 	"Figure4f": {
 		"origin": "py",
 		"filenames": [
-			"heatmap_yBM_FL_fetal_core_no_BM_Gene"
+			"hox_heatmap"
+		]
+	},
+	"Figure4g": {
+		"origin": "",
+		"filenames": [
+			""
 		]
 	},
 	"Figure5a": {
 		"origin": "DESeq",
 		"filenames": [
-			"Main_Figure_5a"
+			"Main_Figure_5a",
+			"FLcore_zscore_boxplot"
 		]
 	},
 	"Figure5b": {
@@ -168,24 +175,36 @@
 		]
 	},
 	"Sup_Figure2b": {
+		"origin": "py",
+		"filenames": [
+			"adt_dot_plot"
+		]
+	},
+	"Sup_Figure2c": {
+		"origin": "",
+		"filenames": [
+			"old "
+		]
+	},
+	"Sup_Figure2d": {
 		"origin": "same",
 		"filenames": [
 			"old supfig1b"
 		]
 	},
-	"Sup_Figure2c": {
+	"Sup_Figure2e": {
 		"origin": "same",
 		"filenames": [
 			"old supfig1c"
 		]
 	},
-	"Sup_Figure2d": {
+	"Sup_Figure2f": {
 		"origin": "DESeq",
 		"filenames": [
 			"PC23_singel_cell_gates_top500"
 		]
 	},
-	"Sup_Figure2e": {
+	"Sup_Figure2g": {
 		"origin": "DESeq",
 		"filenames": [
 			"PC23_singel_cell_clusters_gates_top500"
@@ -232,6 +251,12 @@
 		]
 	},
 	"Sup_Figure3g": {
+		"origin": "",
+		"filenames": [
+			""
+		]
+	},
+	"Sup_Figure3h": {
 		"origin": "py",
 		"filenames": [
 			"bar_plot_roy_preds_on_FLCS22"
