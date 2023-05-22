@@ -8,7 +8,7 @@ samples: ["FL", "yBM"]
 donors: ["yBM1", "yBM2", "FL1", "FL2"]
 deseq_cutoffs:
   log2foldchange: 1
-  adjustedpvalue: 0.01
+  adjustedpvalue: 0.05
 seurat_deg_cutoffs:
   log2foldchange:
     main: 0.5
