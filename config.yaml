@@ -20,7 +20,7 @@ donors: [
 ]
 deseq_cutoffs:
   log2foldchange: 1
-  adjustedpvalue: 0.05
+  adjustedpvalue: 0.01
 seurat_deg_cutoffs:
   log2foldchange:
     main: 0.5

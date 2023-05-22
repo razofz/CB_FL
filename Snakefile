@@ -125,6 +125,9 @@ rule all:
             cluster=config["fl_clusters_to_use"],
             fc=config["seurat_deg_cutoffs"]["log2foldchange"]["main"],
         ),
+        DESEQ2_DIR + "wilcox_bonferroni_ABM_pvals.csv",
+        DESEQ2_DIR + "roy_all_modulescores.csv",
+        DESEQ2_PLOT_DIR + "FLcore_zscore_boxplot.pdf",
         expand(
             DESEQ2_DIR + "FLcoreSC/FC{fc}/Fetal_signature_p005.txt",
             fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
@@ -750,7 +753,8 @@ rule lognorm_analysis:
         adult_signature=DESEQ2_DIR + "FLcorePseudotech/Adult_signature_p005.txt",
         fetal_signature=DESEQ2_DIR + "FLcorePseudotech/Fetal_signature_p005.txt",
         roy_rds=config["raw_dir"] + "paper_specific/Roy/roy.rds",
-        roy_metadata=config["raw_dir"] + "paper_specific/Roy/roy_scarf_metadata.csv",
+        roy_metadata=config["raw_dir"]
+        + "paper_specific/Roy/roy_scarf_metadata.csv",
     output:
         plot_fl=DESEQ2_PLOT_DIR + "lognorm_vln_FL_score.pdf",
         plot_ad=DESEQ2_PLOT_DIR + "lognorm_vln_ABM_score.pdf",

@@ -48,11 +48,12 @@ named_deseq_results_files <- unlist(
 names(named_normed_counts_files) <- gates
 names(named_deseq_results_files) <- gates
 
-if (snakemake@wildcards[["fl_core_version"]] == "FLcorePseudotech") {
-  deseq_design <- ~ pseudo_rep + sample
-} else if (snakemake@wildcards[["fl_core_version"]] == "FLcoreNoPseudotech") {
-  deseq_design <- ~sample
-}
+  deseq_design <- ~ sample
+# if (snakemake@wildcards[["fl_core_version"]] == "FLcorePseudotech") {
+#   deseq_design <- ~ sample
+# } else if (snakemake@wildcards[["fl_core_version"]] == "FLcoreNoPseudotech") {
+#   deseq_design <- ~sample
+# }
 
 for (gate in gates) {
   cts <- read.csv(named_cts_files[gate],
@@ -64,7 +65,7 @@ for (gate in gates) {
     colData = coldata,
     design = deseq_design
   )
-  dds <- DESeq(dds, test = "LRT", reduced = ~1)
+  dds <- DESeq(dds, test = "Wald")
   res <- results(dds, contrast = c("sample", "FL", "yBM"))
   write.table(res,
     file = named_deseq_results_files[gate],

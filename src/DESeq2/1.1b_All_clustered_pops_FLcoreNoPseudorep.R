@@ -60,7 +60,7 @@ names(named_normed_counts_files) <- clusters
 
 if (!is.null(snakemake@wildcards[["fl_core_version"]])) {
   if (snakemake@wildcards[["fl_core_version"]] == "FLcorePseudotech") {
-    deseq_design <- ~ pseudo_rep + sample
+    deseq_design <- ~ sample
   }
 } else {
   deseq_design <- ~sample
@@ -76,7 +76,7 @@ for (cluster in clusters) {
     colData = coldata,
     design = deseq_design
   )
-  dds <- DESeq(dds, test = "LRT", reduced = ~1)
+  dds <- DESeq(dds, test = "Wald")
   res <- results(dds, contrast = c("sample", "FL", "yBM"))
   write.table(res,
     named_deseq_results_files[cluster],
