@@ -51,7 +51,7 @@ deseq2_dir = out_dir + "/DEseq2"
 deseq2_clw_dir = deseq2_dir + "/cluster_wise"
 deseq2_scripts_dir = deseq2_dir + "/scripts"
 deseq2_results_dir = deseq2_dir + "/results"
-deseq2_comparison_dir = raw_dir + "/paper_specific/DEseq2/FL_yBM_comparison/clusters"
+deseq2_comparison_dir = raw_dir + "/paper_specific/DESeq2/FL_yBM_comparison/clusters"
 # deseq2_comparison_dir = "data/processed/DEseq2/results"
 sup_tables_dir = raw_dir + "/paper_specific/Supplemental_tables"
 figures_dir = out_dir + "/Figures"
@@ -308,10 +308,6 @@ for i in n_diff.columns:
     # plt.savefig(f'./images/SVG/bar_n_diff_genes_{i}.svg', dpi=300)
     plt.show()
 
-# + tags=[]
-
-
-
 # +
 n_diff_tot = {}
 n_diff_up = {}
@@ -415,3 +411,6 @@ plt.show()
 # +
 # mat = mat.drop("DC.I_FL", axis=1)
 # mat = mat.drop("T_FL", axis=1)
+# -
+
+
