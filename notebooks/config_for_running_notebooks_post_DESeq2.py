@@ -16,6 +16,7 @@ c.NbConvertApp.notebooks = [
     "9.2_WNN_integration_viz.ipynb",
     "9.3_harmony_integration_viz.ipynb",
     "9.4_z_imported_Civij_data-OSF.ipynb",
-    "9.5_preds_barplots.ipynb"
+    "9.5_preds_barplots.ipynb",
+    "9.6_bar_plot.ipynb",
 ]
 c.NbConvertApp.export_format = "notebook"

@@ -18,7 +18,6 @@ c.NbConvertApp.notebooks = [
     "4.2_DE_FL_yBM_on_FL.ipynb",
     "4.2b_DE_FL_yBM_on_FL_no_pseudorep.ipynb",
     "4.3_DE_gene_analysis_cluster.ipynb",
-    "4.4_bar_plot.ipynb",
     "5.1_make_adt_fcs.ipynb",
     "5.2_ADT_umaps.ipynb",
     "5.3_ADT_gate_analysis.ipynb",
