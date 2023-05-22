@@ -3,6 +3,7 @@ invisible(lapply(list(
   "future.apply",
   "ggplot2",
   "jsonlite",
+  "dplyr",
   "Seurat"
 ), FUN = function(x) {
   suppressPackageStartupMessages(library(x, character.only = T))
@@ -28,12 +29,53 @@ make_named_version <- function(ids, file_list, pattern = "_") {
   return(named_file_list)
 }
 
+deg_results_bm_files <- list()
+deg_results_fl_files <- list()
+
+cutoffs = snakemake@config[["seurat_deg_cutoffs"]][["log2foldchange"]][["all"]]
+names(cutoffs) = cutoffs %>% as.character
+cutoffs_extra = snakemake@config[["seurat_deg_cutoffs"]][["log2foldchange"]][["extra"]]
+names(cutoffs_extra) = cutoffs_extra %>% as.character
+
+
 deg_results_bm_files <- snakemake@output[["deg_results_bm"]]
 deg_results_fl_files <- snakemake@output[["deg_results_fl"]]
 named_deg_results_bm <- make_named_version(clusters, deg_results_bm_files)
 named_deg_results_fl <- make_named_version(clusters, deg_results_fl_files)
 names(named_deg_results_bm) <- clusters
 names(named_deg_results_fl) <- clusters
+
+
+bm_files_extra <- snakemake@output[["deg_results_bm_extra"]]
+fl_files_extra <- snakemake@output[["deg_results_fl_extra"]]
+
+deg_results_bm_files_extra <- list()
+deg_results_fl_files_extra <- list()
+for (cutoff in cutoffs_extra) {
+  cutoff <- cutoff %>% as.character
+  deg_results_bm_files_extra[[cutoff]] <- bm_files_extra[str_detect(
+    pattern = cutoff, bm_files_extra)]
+  deg_results_fl_files_extra[[cutoff]] <- fl_files_extra[str_detect(
+    pattern = cutoff, fl_files_extra)]
+}
+
+
+named_deg_results_bm_extra <- lapply(
+  deg_results_bm_files_extra,
+  FUN = \(x) make_named_version(clusters, x) 
+  )
+
+named_deg_results_fl_extra <- lapply(
+  deg_results_fl_files_extra,
+  FUN = \(x) make_named_version(clusters, x)
+  )
+
+for (cutoff in cutoffs_extra) {
+  cutoff <- cutoff %>% as.character
+  names(named_deg_results_bm_extra[[cutoff]]) <- clusters
+  names(named_deg_results_fl_extra[[cutoff]]) <- clusters
+}
+
 
 # donors <- c(str_c("yBM", 1:2), str_c("FL", 1:2))
 donors <- snakemake@config[["donors"]]
@@ -47,7 +89,6 @@ names(named_cells_files) <- donors
 matrices_files <- snakemake@input[["cite_cell_matrices"]]
 named_matrices_files <- make_named_version(donors, matrices_files)
 names(named_matrices_files) <- donors
-
 
 metadata <- read.table(snakemake@input[["combined_metadata"]], sep = ",")
 rownames(metadata) <- str_replace(
@@ -243,38 +284,55 @@ print(table(combined[["comparees"]]))
 
 DefaultAssay(combined) <- "RNA"
 Idents(combined) <- "comparees"
+padj_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["adjustedpvalue"]]
+
 for (cluster in fl_clusters) {
   # for (cluster in c("HSC")) {
   print(cluster)
-  fc_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["log2foldchange"]]
-  padj_threshold <- snakemake@config[["seurat_deg_cutoffs"]][["adjustedpvalue"]]
-  formatted_cluster <- str_replace(
-    pattern = "-",
-    replacement = ".",
-    string = cluster
-  )
-  markers <- FindMarkers(combined,
-    ident.1 = str_c("BM_", cluster),
-    ident.2 = str_c("FL_", cluster),
-    only.pos = T,
-    logfc.threshold = fc_threshold,
-    verbose = FALSE
-  )
-  markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
-  markers <- markers[markers$p_val_adj < padj_threshold, ]
-  print(named_deg_results_bm[[formatted_cluster]])
-  write.table(markers, file = named_deg_results_bm[[formatted_cluster]])
-  markers <- FindMarkers(combined,
-    ident.1 = str_c("FL_", cluster),
-    ident.2 = str_c("BM_", cluster),
-    only.pos = T,
-    logfc.threshold = fc_threshold,
-    verbose = FALSE
-  )
-  markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
-  markers <- markers[markers$p_val_adj < padj_threshold, ]
-  print(named_deg_results_fl[[formatted_cluster]])
-  write.table(markers, file = named_deg_results_fl[[formatted_cluster]])
+  for (cutoff in cutoffs) {
+    print(cutoff)
+    fc_threshold <- cutoff
+    formatted_cluster <- str_replace(
+      pattern = "-",
+      replacement = ".",
+      string = cluster
+    )
+    filename <- list()
+    # check if this cutoff is the main cutoff (that will be turned into figures)
+    if (cutoff %in% setdiff(cutoffs, cutoffs_extra)) {
+      filename[["bm"]] <- named_deg_results_bm[[formatted_cluster]]
+      filename[["fl"]] <- named_deg_results_fl[[formatted_cluster]]
+      # main cutoff
+    } else {
+      filename[["bm"]] <- named_deg_results_bm_extra[[
+        cutoff %>% as.character]][[
+          formatted_cluster]]
+      filename[["fl"]] <- named_deg_results_fl_extra[[
+        cutoff %>% as.character]][[
+          formatted_cluster]]
+    }
+    markers <- FindMarkers(combined,
+      ident.1 = str_c("BM_", cluster),
+      ident.2 = str_c("FL_", cluster),
+      only.pos = T,
+      logfc.threshold = fc_threshold,
+      verbose = FALSE
+    )
+    markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
+    markers <- markers[markers$p_val_adj < padj_threshold, ]
+    print(filename)
+    write.table(markers, file = filename[["bm"]])
+    markers <- FindMarkers(combined,
+      ident.1 = str_c("FL_", cluster),
+      ident.2 = str_c("BM_", cluster),
+      only.pos = T,
+      logfc.threshold = fc_threshold,
+      verbose = FALSE
+    )
+    markers <- markers[order(markers$avg_log2FC, decreasing = T), ]
+    markers <- markers[markers$p_val_adj < padj_threshold, ]
+    write.table(markers, file = filename[["fl"]])
+  }
 }
 
 # Idents(combined) <- "comparees"

@@ -120,6 +120,15 @@ rule all:
             i=list(range(1, 6)),
             fl_core_version=config["fl_cores"],
         ),
+        expand(
+            DESEQ2_DIR + "FLcoreSC/{cluster}_BM_specific_markers_FC{fc}.csv",
+            cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["main"],
+        ),
+        expand(
+            DESEQ2_DIR + "FLcoreSC/FC{fc}/Fetal_signature_p005.txt",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
 
 
 rule gather_figures:
@@ -284,12 +293,24 @@ rule single_cell_deg:
             donor=config["donors"],
         ),
         deg_results_bm=expand(
-            DESEQ2_DIR + "FLcoreSC/{cluster}_BM_specific_markers.csv",
+            DESEQ2_DIR + "FLcoreSC/{cluster}_BM_specific_markers_FC{fc}.csv",
             cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["main"],
         ),
         deg_results_fl=expand(
-            DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers.csv",
+            DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers_FC{fc}.csv",
             cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["main"],
+        ),
+        deg_results_bm_extra=expand(
+            DESEQ2_DIR + "FLcoreSC/{cluster}_BM_specific_markers_FC{fc}.csv",
+            cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
+        deg_results_fl_extra=expand(
+            DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers_FC{fc}.csv",
+            cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
         ),
     conda:
         "envs/seurat.yaml"
@@ -302,6 +323,8 @@ rule produce_sc_fl_core:
     input:
         deg_results_bm=rules.single_cell_deg.output.deg_results_bm,
         deg_results_fl=rules.single_cell_deg.output.deg_results_fl,
+        deg_results_bm_extra=rules.single_cell_deg.output.deg_results_bm_extra,
+        deg_results_fl_extra=rules.single_cell_deg.output.deg_results_fl_extra,
     output:
         sub_setter_pos=expand(
             DESEQ2_DIR + "sub_setter/FLcoreSC/{cluster}_pos.csv",
@@ -316,6 +339,30 @@ rule produce_sc_fl_core:
         de_genes=DESEQ2_DIR + "FLcoreSC/DE_genes.csv",
         adult_signature=DESEQ2_DIR + "FLcoreSC/Adult_signature_p005.txt",
         fetal_signature=DESEQ2_DIR + "FLcoreSC/Fetal_signature_p005.txt",
+        sub_setter_pos_extra=expand(
+            DESEQ2_DIR + "sub_setter/FLcoreSC/FC{fc}/{cluster}_pos.csv",
+            cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+            allow_missing=True,
+        ),
+        sub_setter_neg_extra=expand(
+            DESEQ2_DIR + "sub_setter/FLcoreSC/FC{fc}/{cluster}_neg.csv",
+            cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+            allow_missing=True,
+        ),
+        de_genes_extra=expand(
+            DESEQ2_DIR + "FLcoreSC/FC{fc}/DE_genes.csv",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
+        adult_signature_extra=expand(
+            DESEQ2_DIR + "FLcoreSC/FC{fc}/Adult_signature_p005.txt",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
+        fetal_signature_extra=expand(
+            DESEQ2_DIR + "FLcoreSC/FC{fc}/Fetal_signature_p005.txt",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
     conda:
         "envs/DESeq2.yaml"
     script:
@@ -629,6 +676,8 @@ rule runx_pca_plots_sc:
         fetal_signature=rules.produce_sc_fl_core.output.fetal_signature,
         samples=config["external_dir"] + "iPS_ETVRUNX/dev_cell_samples.txt",
         fpkm=config["external_dir"] + "iPS_ETVRUNX/fpkm.tsv",
+        adult_signature_extra=rules.produce_sc_fl_core.output.adult_signature_extra,
+        fetal_signature_extra=rules.produce_sc_fl_core.output.fetal_signature_extra,
     output:
         plot_top500=DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500.pdf",
         plot_subset500=DESEQ2_PLOT_DIR
@@ -646,6 +695,35 @@ rule runx_pca_plots_sc:
             DESEQ2_DIR
             + "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
             fl_core_version="FLcoreSC",
+            i=list(range(1, 6)),
+        ), ##############
+        plot_top500_extra=expand(
+            DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500_FC{fc}.pdf",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
+        plot_subset500_extra=expand(
+            DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudorep_core_rem_after_top500_FC{fc}.pdf",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
+        plot_core_extra=expand(DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudoreps_core_FC{fc}.pdf",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
+        overlapping_genes_extra=expand(
+            DESEQ2_DIR + "FLcoreSC/overlapping_genes_pseudoreps_core_FC{fc}.csv",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+        ),
+        plots_random_extra=expand(
+            DESEQ2_PLOT_DIR
+            + "{fl_core_version}_random_PCA_genes_pseudoreps_core_{i}_FC{fc}.pdf",
+            fl_core_version="FLcoreSC",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
+            i=list(range(1, 6)),
+        ),
+        csvs_random_extra=expand(
+            DESEQ2_DIR
+            + "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}_FC{fc}.csv",
+            fl_core_version="FLcoreSC",
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
             i=list(range(1, 6)),
         ),
     conda:

@@ -22,7 +22,10 @@ deseq_cutoffs:
   log2foldchange: 1
   adjustedpvalue: 0.05
 seurat_deg_cutoffs:
-  log2foldchange: 0.25
+  log2foldchange:
+    main: 0.5
+    extra: [0.25, 1.0]
+    all: [0.25, 0.5, 1.0]
   adjustedpvalue: 0.05
 random_params:
   iterations: 10000
