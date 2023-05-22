@@ -81,8 +81,10 @@
 		"filenames": []
 	},
 	"Figure3h": {
-		"origin": "table",
-		"filenames": []
+		"origin": "py",
+		"filenames": [
+			"bar_plot_roy_preds_on_FLCS22"
+		]
 	},
 	"Figure4b": {
 		"origin": "py",
@@ -103,9 +105,10 @@
 		]
 	},
 	"Figure4g": {
-		"origin": "",
+		"origin": "DESeq",
 		"filenames": [
-			""
+			"lognorm_vln_FL_score",
+			"lognorm_vln_ABM_score"
 		]
 	},
 	"Figure5a": {
@@ -254,12 +257,6 @@
 		"origin": "",
 		"filenames": [
 			""
-		]
-	},
-	"Sup_Figure3h": {
-		"origin": "py",
-		"filenames": [
-			"bar_plot_roy_preds_on_FLCS22"
 		]
 	},
 	"Sup_Figure4a": {
