@@ -3,21 +3,9 @@ external_dir: "data/external/"
 interim_dir: "data/interim/"
 processed_dir: "data/processed/"
 raw_dir: "data/raw/"
-fl_cores: [
-  "FLcoreNoPseudorep",
-  "FLcoreSC",
-  "FLcorePseudotech"
-]
-samples: [
-  "FL",
-  "yBM"
-]
-donors: [
-  "yBM1",
-  "yBM2",
-  "FL1",
-  "FL2",
-]
+fl_cores: ["FLcoreNoPseudorep", "FLcoreSC", "FLcorePseudotech"]
+samples: ["FL", "yBM"]
+donors: ["yBM1", "yBM2", "FL1", "FL2"]
 deseq_cutoffs:
   log2foldchange: 1
   adjustedpvalue: 0.01
@@ -29,38 +17,31 @@ seurat_deg_cutoffs:
   adjustedpvalue: 0.05
 random_params:
   iterations: 10000
-fl_clusters_to_use: [
-  "Cyc",
-  "DC.Mono",
-  "GMP",
-  "HSC",
-  "Ly.I",
-  "Ly.II",
-  "MEP",
-  "MPP.I",
-  "MPP.II"
-]
-gates_to_use: [
-  "CD7_CLP",
-  "CD10_CLP",
-  "CD38neg_MPP",
-  "CD49Fpos_HSC",
-  "CD90pos_HSC",
-  "CMP_123",
-  "CMP_135",
-  "GMP_123",
-  "GMP_135",
-  "IL7RA_CLP",
-  "LMPP",
-  "MEP_123",
-  "MEP_135"
-]
-leukemia_types: [
-  "KMT2A-MLLT1",
-  "BCR-ABL1",
-  "KMT2A-AFF1",
-  "High hyperdiploid",
-  "Low hyperdiploid",
-  "ETV6-RUNX1",
-  "KMT2A-MLLT3"
-]
+fl_clusters_to_use:
+  ["Cyc", "DC.Mono", "GMP", "HSC", "Ly.I", "Ly.II", "MEP", "MPP.I", "MPP.II"]
+gates_to_use:
+  [
+    "CD7_CLP",
+    "CD10_CLP",
+    "CD38neg_MPP",
+    "CD49Fpos_HSC",
+    "CD90pos_HSC",
+    "CMP_123",
+    "CMP_135",
+    "GMP_123",
+    "GMP_135",
+    "IL7RA_CLP",
+    "LMPP",
+    "MEP_123",
+    "MEP_135",
+  ]
+leukemia_types:
+  [
+    "KMT2A-MLLT1",
+    "BCR-ABL1",
+    "KMT2A-AFF1",
+    "High hyperdiploid",
+    "Low hyperdiploid",
+    "ETV6-RUNX1",
+    "KMT2A-MLLT3",
+  ]
