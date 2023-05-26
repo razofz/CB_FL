@@ -81,8 +81,9 @@ rule all:
         DESEQ2_PLOT_DIR + "IndividualPC1_PC2_fetalcore_MLLAF4.pdf",
         DESEQ2_PLOT_DIR + "Main_Figure_5a.pdf",
         expand(
-            DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers.csv",
+            DESEQ2_DIR + "FLcoreSC/{cluster}_FL_specific_markers_FC{fc}.csv",
             cluster=config["fl_clusters_to_use"],
+            fc=config["seurat_deg_cutoffs"]["log2foldchange"]["main"],
         ),
         expand(DESEQ2_PLOT_DIR + "random_{i}.csv", i=list(range(1, 6))),
         expand(
@@ -699,20 +700,24 @@ rule runx_pca_plots_sc:
             + "{fl_core_version}/random_PCA_genes_pseudoreps_core_{i}.csv",
             fl_core_version="FLcoreSC",
             i=list(range(1, 6)),
-        ), ##############
+        ),
+        ##############
         plot_top500_extra=expand(
             DESEQ2_PLOT_DIR + "FLcoreSC_PCA_top500_FC{fc}.pdf",
             fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
         ),
         plot_subset500_extra=expand(
-            DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudorep_core_rem_after_top500_FC{fc}.pdf",
+            DESEQ2_PLOT_DIR
+            + "FLcoreSC_PCA_pseudorep_core_rem_after_top500_FC{fc}.pdf",
             fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
         ),
-        plot_core_extra=expand(DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudoreps_core_FC{fc}.pdf",
+        plot_core_extra=expand(
+            DESEQ2_PLOT_DIR + "FLcoreSC_PCA_pseudoreps_core_FC{fc}.pdf",
             fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
         ),
         overlapping_genes_extra=expand(
-            DESEQ2_DIR + "FLcoreSC/overlapping_genes_pseudoreps_core_FC{fc}.csv",
+            DESEQ2_DIR
+            + "FLcoreSC/overlapping_genes_pseudoreps_core_FC{fc}.csv",
             fc=config["seurat_deg_cutoffs"]["log2foldchange"]["extra"],
         ),
         plots_random_extra=expand(
