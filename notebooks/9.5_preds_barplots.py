@@ -93,7 +93,7 @@ for i in x:
 
 # -
 
-# fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+fig, ax = plt.subplots(1, 1, figsize=(10, 4))
 
 bm = pd.read_csv(in_files["BM_preds"], index_col=0)
 fl = pd.read_csv(in_files["FL_preds"], index_col=0)
@@ -140,6 +140,9 @@ bm = bm.T
 
 bm
 
+color_palette_BM["MEP-II"] = "#cc4a4a"
+color_palette_BM["MPP-II"] = "#ffc4d4"
+
 labels = bm.columns
 fig, ax = plt.subplots()
 clean_axis(ax)
@@ -159,6 +162,7 @@ ax.set_xticklabels(labels, rotation=90)
 # ax.legend(bm.index)
 plt.savefig(out_files["BM_preds_plot"])
 
+# +
 # # labels = bm.columns
 # fig, ax = plt.subplots()
 # fig.set_figheight(8)

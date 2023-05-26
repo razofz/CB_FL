@@ -89,8 +89,6 @@ for i in x:
     color_palette_FL[i] = x[i][x[i] > 0].index[0]
 # -
 
-color_palette_BM
-
 for sample in ["FL_CS16", "FL_HPC", "FL_W9", "CB_HPC"]:
     print(sample)
     for g, ms in ds_yBM.get_mapping_score(
@@ -118,6 +116,13 @@ for sample in ["FL_CS16", "FL_HPC", "FL_W9", "CB_HPC"]:
         )
         # savename=f'./images/Sup_Figure_2c_{sample}.svg', save_dpi=300)
 
+color_palette_BM
+
+color_palette_BM["MEP-II"] = "#cc4a4a"
+color_palette_BM["MPP-II"] = "#ffc4d4"
+
+color_palette_BM
+
 FL_classified_clusts = {}
 FL_clusts = ds_FL.cells.fetch("RNA_cluster_names")
 for i in sorted(set(FL_clusts)):
@@ -127,9 +132,6 @@ for i in sorted(set(FL_clusts)):
         threshold_fraction=0.4,
         target_subset=list(np.where(FL_clusts == i)[0]),
     )
-
-color_palette_BM["MEP-II"] = "#cc4a4a"
-color_palette_BM["MPP-II"] = "#ffc4c4"
 
 # +
 clust_order = [

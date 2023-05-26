@@ -293,11 +293,9 @@ df = df.drop(index="NA")
 df = df.drop(index="nan")
 df = df / df.sum() * 100
 
-# +
-
 color_palette_BM_slight_change = color_palette_BM
 color_palette_BM_slight_change["MEP-II"] = "#cc4a4a"
-color_palette_BM_slight_change["MPP-II"] = "#ffc4c4"
+color_palette_BM_slight_change["MPP-II"] = "#ffc4d4"
 
 # +
 clust_order = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
