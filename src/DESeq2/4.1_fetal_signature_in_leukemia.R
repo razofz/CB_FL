@@ -122,8 +122,8 @@ ids <- getBM(
 # PCA with our FL/BM genes
 intgroup <- c("age_group", "type", "age", "gender", "RNA_lib") #
 select <- rownames(vsd) %in% ids$ensembl_gene_id # find the our gene sets
-# length(select)
-# table(select)
+length(select)
+table(select)
 pca <- prcomp(t(assay(vsd)[select, ])) # calculate PCA
 percent_var <- pca$sdev^2 / sum(pca$sdev^2) # calc PCA contribution
 intgroup_df <- as.data.frame(colData(vsd)[, intgroup, drop = FALSE])
