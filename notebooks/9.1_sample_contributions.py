@@ -183,7 +183,9 @@ for sample in sorted(list(ds_BM.z.RNA.projections.keys())):
     )
     print(sample, len(classified_cells_BM[sample]))
 
-sample_oi = ["FL_CS16", "FL_hpc", "FL_W9", "CB_hpc"]
+in_files["zarrs"]
+
+sample_oi = ["FL_CS16", "FL_hpc", "FL_W9", "CB_hpc", "yBM_hpc"]
 # data_stores = {
 #     "FL_CS16": "RNA_FL_CS16_merged",
 #     "FL_HPC": "RNA_FL_hpc_merged",
@@ -198,6 +200,8 @@ for i in sample_oi:
     ds2 = scf.DataStore(in_files["zarrs"][i])
     if "hpc" in i:
         i = i.upper()
+        if "BM" in i:
+            i = i[0].lower() + i[1:]
     preds_BM[i] = dict(
         zip(ds2.cells.fetch("ids"), classified_cells_BM[i].values)
     )
@@ -250,7 +254,7 @@ for sample in sorted(list(ds_FL.z.RNA.projections.keys())):
     )
     print(sample, len(classified_cells_FL[sample]))
 
-sample_oi = ["FL_CS16", "FL_W9", "CB_hpc", "yBM_hpc"]
+sample_oi = ["FL_CS16", "FL_W9", "CB_hpc", "yBM_hpc", "FL_hpc"]
 # data_stores = {
 #     "FL_CS16": "RNA_FL_CS16_merged",
 #     "yBM_HPC": "RNA_yBM_hpc_merged",
@@ -262,10 +266,10 @@ for i in sample_oi:
     print(i, in_files["zarrs"][i])
     # data_stores[i]
     ds2 = scf.DataStore(in_files["zarrs"][i])
-    if "CB_hpc" in i:
-        i = i.upper()
-    elif "yBM_hpc" in i:
+    if "yBM_hpc" in i:
         i = i[:3] + i[3:].upper()
+    elif "hpc" in i:
+        i = i.upper()
     preds_FL[i] = dict(
         zip(ds2.cells.fetch("ids"), classified_cells_FL[i].values)
     )
