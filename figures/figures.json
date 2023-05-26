@@ -148,7 +148,7 @@
 	"Figure5f": {
 		"origin": "DESeq",
 		"filenames": [
-			"heatmap_B_fetal_sig_ALL_AF4"
+			"heatmap_Hox_genes_AF4"
 		]
 	},
 	"Sup_Figure1a": {
@@ -386,7 +386,7 @@
 	"Sup_Figure6f": {
 		"origin": "DESeq",
 		"filenames": [
-			"heatmap_Hox_genes_AF4"
+			"heatmap_B_fetal_sig_ALL_AF4"
 		]
 	}
 }
