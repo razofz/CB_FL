@@ -367,26 +367,26 @@
 	"Sup_Figure6d": {
 		"origin": "DESeq",
 		"filenames": [
-			"PC1_variance_test_BCR-ABL1_its_10000",
-			"PC1_variance_test_ETV6-RUNX1_its_10000",
-			"PC1_variance_test_High hyperdiploid_its_10000",
-			"PC1_variance_test_KMT2A-AFF1_its_10000",
-			"PC1_variance_test_Low hyperdiploid_its_10000"
-		]
-	},
-	"Sup_Figure6e": {
-		"origin": "DESeq",
-		"filenames": [
 			"Fetal_core_up_box_plot_BCR-ABL1",
 			"Fetal_core_up_box_plot_High hyperdiploid",
 			"Fetal_core_down_box_plot_BCR-ABL1",
 			"Fetal_core_down_box_plot_High hyperdiploid"
 		]
 	},
-	"Sup_Figure6f": {
+	"Sup_Figure6e": {
 		"origin": "DESeq",
 		"filenames": [
 			"heatmap_B_fetal_sig_ALL_AF4"
+		]
+	},
+	"Sup_Figure6f": {
+		"origin": "DESeq",
+		"filenames": [
+			"PC1_variance_test_BCR-ABL1_its_10000",
+			"PC1_variance_test_ETV6-RUNX1_its_10000",
+			"PC1_variance_test_High hyperdiploid_its_10000",
+			"PC1_variance_test_KMT2A-AFF1_its_10000",
+			"PC1_variance_test_Low hyperdiploid_its_10000"
 		]
 	}
 }
