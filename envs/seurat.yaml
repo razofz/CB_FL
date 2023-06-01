@@ -1,28 +1,31 @@
 name: seurat_FL
 channels:
-  - conda-forge
   - defaults
+  - conda-forge
   - bioconda
 dependencies:
   - _libgcc_mutex=0.1
   - _openmp_mutex=4.5
   - _r-mutex=1.0.1
+  - backports=1.0
+  - backports.functools_lru_cache=1.6.4
   - binutils_impl_linux-64=2.36.1
   - binutils_linux-64=2.36
   - brotlipy=0.7.0
   - bwidget=1.9.14
   - bzip2=1.0.8
   - c-ares=1.18.1
-  - ca-certificates=2022.6.15
+  - ca-certificates=2022.12.7
   - cairo=1.16.0
-  - certifi=2022.6.15
+  - certifi=2022.12.7
   - cffi=1.15.0
   - charset-normalizer=2.0.9
   - colorama=0.4.4
   - conda=4.11.0
   - conda-package-handling=1.7.3
-  - cryptography=36.0.1
-  - curl=7.80.0
+  - cryptography=40.0.2
+  - curl=7.86.0
+  - fmt=9.1.0
   - font-ttf-dejavu-sans-mono=2.37
   - font-ttf-inconsolata=3.000
   - font-ttf-source-code-pro=2.038
@@ -50,13 +53,13 @@ dependencies:
   - jpeg=9d
   - kernel-headers_linux-64=2.6.32
   - keyutils=1.6.1
-  - krb5=1.19.2
+  - krb5=1.19.3
   - ld_impl_linux-64=2.36.1
   - lerc=3.0
   - libarchive=3.5.2
   - libblas=3.9.0
   - libcblas=3.9.0
-  - libcurl=7.80.0
+  - libcurl=7.86.0
   - libdeflate=1.8
   - libedit=3.1.20210714
   - libev=4.33
@@ -65,20 +68,20 @@ dependencies:
   - libgcc-ng=12.1.0
   - libgfortran-ng=11.2.0
   - libgfortran5=11.2.0
-  - libgit2=1.4.3
-  - libglib=2.70.2
+  - libgit2=1.5.0
+  - libglib=2.74.0
   - libgomp=12.1.0
-  - libiconv=1.16
+  - libiconv=1.17
   - liblapack=3.9.0
   - libllvm11=11.1.0
-  - libmamba=0.19.1
-  - libmambapy=0.19.1
-  - libnghttp2=1.46.0
+  - libmamba=1.1.0
+  - libmambapy=1.1.0
+  - libnghttp2=1.52.0
   - libnsl=2.0.0
   - libopenblas=0.3.18
   - libpng=1.6.37
   - libsanitizer=9.4.0
-  - libsolv=0.7.19
+  - libsolv=0.7.23
   - libssh2=1.10.0
   - libstdcxx-devel_linux-64=9.4.0
   - libstdcxx-ng=12.1.0
@@ -86,27 +89,30 @@ dependencies:
   - libuuid=2.32.1
   - libwebp-base=1.2.1
   - libxcb=1.13
-  - libxml2=2.9.12
-  - libzlib=1.2.11
+  - libxml2=2.9.14
+  - libzlib=1.2.13
   - llvmlite=0.38.0
   - lz4-c=1.9.3
   - lzo=2.10
   - make=4.3
-  - mamba=0.19.1
+  - mamba=1.1.0
   - ncurses=6.2
   - numba=0.55.0
   - numpy=1.21.5
-  - openssl=1.1.1q
+  - openssl=3.1.0
   - pandoc=2.19
   - pango=1.48.10
   - pcre=8.45
   - pcre2=10.37
   - pip=21.3.1
   - pixman=0.40.0
+  - prompt-toolkit=3.0.38
+  - prompt_toolkit=3.0.38
   - pthread-stubs=0.4
   - pybind11-abi=4
   - pycosat=0.6.3
   - pycparser=2.21
+  - pygments=2.15.1
   - pynndescent=0.5.5
   - pyopenssl=21.0.0
   - pysocks=1.7.1
@@ -212,7 +218,7 @@ dependencies:
   - r-munsell=0.5.0
   - r-nlme=3.1_153
   - r-npsurv=0.5_0
-  - r-openssl=1.4.6
+  - r-openssl=2.0.6
   - r-parallelly=1.30.0
   - r-patchwork=1.1.1
   - r-pbapply=1.5_0
@@ -309,6 +315,8 @@ dependencies:
   - r-yaml=2.2.1
   - r-zip=2.2.0
   - r-zoo=1.8_9
+  - radian=0.6.5
+  - rchitect=0.3.40
   - readline=8.1
   - reproc=14.2.3
   - reproc-cpp=14.2.3
@@ -329,6 +337,7 @@ dependencies:
   - tzdata=2021e
   - umap-learn=0.5.2
   - urllib3=1.26.7
+  - wcwidth=0.2.6
   - wheel=0.37.1
   - xorg-kbproto=1.0.7
   - xorg-libice=1.0.10
@@ -342,8 +351,8 @@ dependencies:
   - xorg-renderproto=0.11.1
   - xorg-xextproto=7.3.0
   - xorg-xproto=7.0.31
-  - xz=5.2.5
+  - xz=5.2.6
   - yaml=0.2.5
-  - yaml-cpp=0.6.3
-  - zlib=1.2.11
+  - yaml-cpp=0.7.0
+  - zlib=1.2.13
   - zstd=1.5.1
