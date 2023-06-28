@@ -1,4 +1,4 @@
-# A COMBINED IMMUNOPHENOTYPIC AND TRANSCRIPTIONAL SINGLE-CELL MAP OF FIRST TRIMESTER HUMAN FETAL LIVER HEMATOPOIESIS
+# Single-cell multiomics of human fetal hematopoiesis defines a developmental specific population and a fetal signature
 
 **N. B.** Before running any scripts or notebooks, please edit the file
 `project_path` to contain your local path to this folder. For example, if your
